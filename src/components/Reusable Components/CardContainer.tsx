@@ -18,11 +18,11 @@ const CardContainer = ({ items = [], className = "" }: any) => {
   };
 
   return (
-    <div className={`relative ${className} lg:px-20 `}>
+    <div className={`relative ${className} `}>
       <button
         aria-label="Scroll left"
         onClick={() => scrollByWidth("left")}
-        className="absolute left-0 lg:left-10 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 rounded-full shadow-md "
+        className="absolute left-5 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 rounded-full shadow-md "
       >
         <FaArrowLeft />
       </button>
@@ -34,7 +34,7 @@ const CardContainer = ({ items = [], className = "" }: any) => {
       >
         {items.length === 0
           ? // ay klam l7ad ma yeb2a fi database
-            Array.from({ length: 10 }).map((_, i) => (
+            Array.from({ length: 100 }).map((_, i) => (
               <div key={i} className="flex-shrink-0" style={{ width: 280 }}>
                 <Card
                   title={`Sample ${i + 1}`}
@@ -58,7 +58,7 @@ const CardContainer = ({ items = [], className = "" }: any) => {
       <button
         aria-label="Scroll right"
         onClick={() => scrollByWidth("right")}
-        className="absolute right-0 lg:right-10 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 rounded-full shadow-md"
+        className="absolute right-5 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 rounded-full shadow-md"
       >
         <FaArrowRight />
       </button>

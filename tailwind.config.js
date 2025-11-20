@@ -4,7 +4,11 @@ import daisyui from "daisyui";
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        outfit: ["Link", "Outfit", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
+    },
   },
   plugins: [daisyui],
   daisyui: {
