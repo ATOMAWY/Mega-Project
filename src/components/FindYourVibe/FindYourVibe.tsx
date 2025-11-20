@@ -2,7 +2,7 @@ import { CiSearch } from "react-icons/ci";
 
 const FindYourVibe = () => {
   return (
-    <div className="flex items-center justify-center px-16 flex-col">
+    <div className="flex items-center justify-center px-16 flex-col mb-20">
       <h1 className="text-xl w-full text-left font-bold">Find Your Vibe</h1>
 
       <div className="relative w-3/4 lg:w-1/2">
