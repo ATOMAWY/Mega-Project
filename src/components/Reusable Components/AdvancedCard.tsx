@@ -92,7 +92,7 @@ const AdvancedCard = ({
             {/* this hidden checkbox controls the state */}
             <input type="checkbox" defaultChecked={isFavorite} />
 
-            <div className="swap-on text-red-800">
+            <div className="swap-on text-orange-400">
               <FaHeart />
             </div>
             <div className="swap-off text-gray-600">
@@ -101,7 +101,7 @@ const AdvancedCard = ({
           </label>
         </div>
 
-        <a className="btn bg-orange-400 align-middle justify-center">
+        <a className="btn bg-orange-400 align-middle justify-center text-white">
           View Details
         </a>
       </div>
