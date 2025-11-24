@@ -46,7 +46,7 @@ const NavBar = () => {
               <Link
                 to="/"
                 className={
-                  isActive("/") ? "text-gray-500 pointer-events-none" : ""
+                  isActive("/") ? "text-gray-400 pointer-events-none" : ""
                 }
               >
                 Home
@@ -56,7 +56,7 @@ const NavBar = () => {
               <Link
                 to="/quiz"
                 className={
-                  isActive("/quiz") ? "text-gray-800 pointer-events-none" : ""
+                  isActive("/quiz") ? "text-gray-400 pointer-events-none" : ""
                 }
               >
                 Quiz
