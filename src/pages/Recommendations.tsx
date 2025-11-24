@@ -2,12 +2,9 @@ import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import FilterRecommendations from "./../components/Filter Recommendations/FilterRecommendations";
 import RecommendedCards from "./../components/Recommended Cards/RecommendedCards";
+import { attractions } from "../data/attractions";
 
-type Props = {
-  attractions: any[];
-};
-
-const Recommendations = ({ attractions = [] }: Props) => {
+const Recommendations = () => {
   return (
     <div className="overflow-x-hidden">
       <NavBar />
@@ -29,8 +26,10 @@ const Recommendations = ({ attractions = [] }: Props) => {
             defaultValue={"1"}
           >
             <option value="1">Rating: High to Low</option>
-            <option value="2">Option 1</option>
-            <option value="3">Option 2</option>
+            <option value="2">Rating: Low to High</option>
+            <option value="3">Budget: High to Low</option>
+            <option value="4">Budget: Low to High</option>
+            <option value="5">Distance: Nearest to Furthest</option>
           </select>
         </div>
       </div>

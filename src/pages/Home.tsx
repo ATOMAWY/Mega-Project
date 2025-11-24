@@ -5,12 +5,9 @@ import FindYourVibe from "../components/FindYourVibe/FindYourVibe";
 import TrendingAttractions from "../components/TrendingAttractions/TrendingAttractions";
 import HiddenGems from "../components/HiddenGems/HiddenGems";
 import Footer from "../components/Footer/Footer";
+import { attractions } from "../data/attractions";
 
-type Props = {
-  attractions: any[];
-};
-
-const Home = ({ attractions = [] }: Props) => {
+const Home = () => {
   return (
     <div>
       <NavBar />

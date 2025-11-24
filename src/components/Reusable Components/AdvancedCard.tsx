@@ -54,8 +54,10 @@ const AdvancedCard = ({
       <div className="px-6 py-4 flex-grow">
         <div className="flex">
           {title && <div className="font-bold text-xl mb-2">{title}</div>}
-          <div className="ml-auto text-sm text-black bg-gray-200 align-middle p-2 justify-center w-fit px-2 rounded-full">
-            {category}
+          <div className="ml-auto">
+            <p className="text-sm text-black bg-gray-200 align-middle p-2 justify-center w-fit px-2 rounded-full">
+              {category}
+            </p>
           </div>
         </div>
 
