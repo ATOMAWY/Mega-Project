@@ -78,9 +78,6 @@ const Browse = () => {
       </div>
 
       <div className="mx-4 sm:mx-6 lg:mx-20 my-4 flex flex-col lg:flex-row gap-5">
-        <div className="w-full lg:w-auto">
-          <FilterRecommendations />
-        </div>
         <div className="w-full lg:flex-1 min-w-0">
           <RecommendedCards attractions={filteredAttractions} />
         </div>
