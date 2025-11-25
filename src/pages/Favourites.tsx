@@ -8,9 +8,8 @@ import {
   removeFavorite,
   updateFavoriteCategory,
 } from "../services/favoritesService";
-import type  { LocalFavorite } from "../types/favorite";
-import { FaHeart, FaFilter, FaSort, FaTimes } from "react-icons/fa";
-import { MdCategory } from "react-icons/md";
+import type { LocalFavorite } from "../types/favorite";
+import { FaHeart, FaFilter } from "react-icons/fa";
 
 type SortOption = "newest" | "oldest" | "rating" | "name";
 type FilterOption = "all" | string; // "all" or category name
@@ -115,7 +114,9 @@ const Favourites = () => {
 
   // Handle remove favorite
   const handleRemoveFavorite = (placeId: number) => {
-    if (window.confirm("Are you sure you want to remove this from favorites?")) {
+    if (
+      window.confirm("Are you sure you want to remove this from favorites?")
+    ) {
       removeFavorite(placeId);
     }
   };
@@ -148,7 +149,9 @@ const Favourites = () => {
             <p className="text-lg text-gray-500">
               {favoriteAttractions.length === 0
                 ? "You haven't added any favorites yet. Start exploring and save your favorite places!"
-                : `You have ${favoriteAttractions.length} favorite place${favoriteAttractions.length !== 1 ? "s" : ""} saved.`}
+                : `You have ${favoriteAttractions.length} favorite place${
+                    favoriteAttractions.length !== 1 ? "s" : ""
+                  } saved.`}
             </p>
           </div>
 
@@ -196,9 +199,7 @@ const Favourites = () => {
                     </span>
                     <select
                       value={sortBy}
-                      onChange={(e) =>
-                        setSortBy(e.target.value as SortOption)
-                      }
+                      onChange={(e) => setSortBy(e.target.value as SortOption)}
                       className="select select-bordered select-sm"
                     >
                       <option value="newest">Newest First</option>
