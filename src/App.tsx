@@ -11,6 +11,10 @@ import AttractionDetails from "./pages/AttractionDetails";
 import Favourites from "./pages/Favourites";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import HelpCenter from "./pages/HelpCenter";
+import ContactUs from "./pages/ContactUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 function App() {
   return (
@@ -27,6 +31,10 @@ function App() {
         <Route path="/browse" element={<Browse />} />
         <Route path="/favourites" element={<Favourites />} />
         <Route path="/attraction/:id" element={<AttractionDetails />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Router>
