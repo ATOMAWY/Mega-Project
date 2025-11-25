@@ -1,6 +1,5 @@
 import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
-import FilterRecommendations from "./../components/Filter Recommendations/FilterRecommendations";
 import RecommendedCards from "./../components/Recommended Cards/RecommendedCards";
 import { attractions } from "../data/attractions";
 import { useState, useEffect } from "react";

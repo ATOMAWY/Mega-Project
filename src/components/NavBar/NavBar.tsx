@@ -6,7 +6,11 @@ import { FaList } from "react-icons/fa6";
 import { FaCalendarAlt } from "react-icons/fa";
 import { FaMap } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa";
-import { isAuthenticated, getCurrentUser, logout } from "../../services/authService";
+import {
+  isAuthenticated,
+  getCurrentUser,
+  logout,
+} from "../../services/authService";
 import type { User } from "../../types/auth";
 
 const NavBar = () => {

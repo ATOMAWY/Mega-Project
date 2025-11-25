@@ -5,26 +5,26 @@
 import type { LocalFavorite } from "../types/favorite";
 
 const FAVORITES_KEY = "attraction_favorites";
-const USER_ID_KEY = "current_user_id"; // For future use with database
+// const USER_ID_KEY = "current_user_id"; // For future use with database
 
 // Get current user ID (for future database integration)
 // For now, returns a default or stored user ID
-const getCurrentUserId = (): string => {
-  if (typeof window === "undefined") return "default-user";
-  
-  try {
-    const userId = localStorage.getItem(USER_ID_KEY);
-    return userId || "default-user";
-  } catch (error) {
-    console.error("Error reading user ID:", error);
-    return "default-user";
-  }
-};
+// const getCurrentUserId = (): string => {
+//   if (typeof window === "undefined") return "default-user";
+
+//   try {
+//     const userId = localStorage.getItem(USER_ID_KEY);
+//     return userId || "default-user";
+//   } catch (error) {
+//     console.error("Error reading user ID:", error);
+//     return "default-user";
+//   }
+// };
 
 // Get all favorites from localStorage
 export const getFavorites = (): LocalFavorite[] => {
   if (typeof window === "undefined") return [];
-  
+
   try {
     const favorites = localStorage.getItem(FAVORITES_KEY);
     return favorites ? JSON.parse(favorites) : [];
@@ -47,15 +47,12 @@ export const isFavorite = (placeId: number): boolean => {
 };
 
 // Add a favorite
-export const addFavorite = (
-  placeId: number,
-  userCategory?: string
-): void => {
+export const addFavorite = (placeId: number, userCategory?: string): void => {
   if (typeof window === "undefined") return;
-  
+
   try {
     const favorites = getFavorites();
-    
+
     // Check if already favorited
     if (favorites.some((fav) => fav.placeId === placeId)) {
       // Update category if provided
@@ -69,17 +66,17 @@ export const addFavorite = (
       }
       return;
     }
-    
+
     // Add new favorite
     const newFavorite: LocalFavorite = {
       placeId,
       userCategory,
       createdAt: new Date().toISOString(),
     };
-    
+
     favorites.push(newFavorite);
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-    
+
     // Dispatch custom event for same-tab updates
     window.dispatchEvent(new CustomEvent("favoritesUpdated"));
   } catch (error) {
@@ -90,12 +87,12 @@ export const addFavorite = (
 // Remove a favorite
 export const removeFavorite = (placeId: number): void => {
   if (typeof window === "undefined") return;
-  
+
   try {
     const favorites = getFavorites();
     const updatedFavorites = favorites.filter((fav) => fav.placeId !== placeId);
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites));
-    
+
     // Dispatch custom event for same-tab updates
     window.dispatchEvent(new CustomEvent("favoritesUpdated"));
   } catch (error) {
@@ -123,7 +120,7 @@ export const updateFavoriteCategory = (
   userCategory: string
 ): void => {
   if (typeof window === "undefined") return;
-  
+
   try {
     const favorites = getFavorites();
     const updatedFavorites = favorites.map((fav) =>
@@ -132,7 +129,7 @@ export const updateFavoriteCategory = (
         : fav
     );
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites));
-    
+
     // Dispatch custom event for same-tab updates
     window.dispatchEvent(new CustomEvent("favoritesUpdated"));
   } catch (error) {
@@ -184,4 +181,3 @@ export const removeFavoriteFromDB = async (
   if (!response.ok) throw new Error("Failed to remove favorite");
 };
 */
-

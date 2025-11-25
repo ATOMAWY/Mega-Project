@@ -11,6 +11,8 @@ import {
 import type { LocalFavorite } from "../types/favorite";
 import { FaHeart, FaFilter } from "react-icons/fa";
 
+import { Link } from "react-router";
+
 type SortOption = "newest" | "oldest" | "rating" | "name";
 type FilterOption = "all" | string; // "all" or category name
 
@@ -233,12 +235,12 @@ const Favourites = () => {
                   Start exploring attractions and add them to your favorites by
                   clicking the heart icon on any attraction card or detail page.
                 </p>
-                <a
-                  href="/browse"
+                <Link
+                  to="/browse"
                   className="btn bg-orange-400 text-white hover:bg-orange-500"
                 >
                   Browse Attractions
-                </a>
+                </Link>
               </div>
             </div>
           ) : filteredAndSortedFavorites.length === 0 ? (
