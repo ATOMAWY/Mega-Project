@@ -88,7 +88,16 @@ const NavBar = () => {
               <a>Trip Planner</a>
             </li>
             <li>
-              <a>Favourites</a>
+              <Link
+                to="/favourites"
+                className={
+                  isActive("/favourites")
+                    ? "text-gray-400 pointer-events-none"
+                    : ""
+                }
+              >
+                Favourites
+              </Link>
             </li>
             <li>
               <Link
@@ -160,10 +169,15 @@ const NavBar = () => {
           <FaCalendarAlt />
           Trip Planner
         </a>
-        <a className="btn btn-ghost text-sm">
+        <Link
+          to="/favourites"
+          className={`btn btn-ghost text-sm ${
+            isActive("/favourites") ? "bg-gray-200 pointer-events-none" : ""
+          }`}
+        >
           <FaRegHeart />
           Favourites
-        </a>
+        </Link>
       </div>
 
       {/* beginning of profile section */}

@@ -9,11 +9,12 @@ import { TbMapRoute } from "react-icons/tb";
 import { FaHeart } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import { isFavorite, toggleFavorite as toggleFavoriteService } from "../services/favoritesService";
 
 const AttractionDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteState, setIsFavoriteState] = useState(false);
 
   // Find the attraction by id
   const attractionId = id ? parseInt(id) : null;
@@ -47,13 +48,35 @@ const AttractionDetails = () => {
     i < roundedRating ? "★" : "☆"
   ).join("");
 
-  // Initialize favorite state from attraction data
+  // Initialize favorite state from localStorage
   useEffect(() => {
-    setIsFavorite(attraction.isFavorite);
-  }, [attraction.isFavorite]);
+    if (attractionId !== null) {
+      setIsFavoriteState(isFavorite(attractionId));
+    }
+  }, [attractionId]);
+
+  // Listen for favorite updates
+  useEffect(() => {
+    const handleFavoritesUpdated = () => {
+      if (attractionId !== null) {
+        setIsFavoriteState(isFavorite(attractionId));
+      }
+    };
+
+    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
+    window.addEventListener("storage", handleFavoritesUpdated);
+
+    return () => {
+      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
+      window.removeEventListener("storage", handleFavoritesUpdated);
+    };
+  }, [attractionId]);
 
   const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+    if (attractionId !== null) {
+      const newState = toggleFavoriteService(attractionId);
+      setIsFavoriteState(newState);
+    }
   };
 
   // Get other attractions (excluding current one) for trending and hidden gems
@@ -108,19 +131,17 @@ const AttractionDetails = () => {
                   </span>
                 </div>
               </div>
-              <label className="swap swap-flip text-3xl cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isFavorite}
-                  onChange={toggleFavorite}
-                />
-                <div className="swap-on text-orange-400">
-                  <FaHeart />
-                </div>
-                <div className="swap-off text-gray-600">
-                  <FaRegHeart />
-                </div>
-              </label>
+              <button
+                onClick={toggleFavorite}
+                className="text-3xl transition-colors"
+                title={isFavoriteState ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isFavoriteState ? (
+                  <FaHeart className="text-orange-400" />
+                ) : (
+                  <FaRegHeart className="text-gray-600" />
+                )}
+              </button>
             </div>
 
             {/* Info Icons */}
