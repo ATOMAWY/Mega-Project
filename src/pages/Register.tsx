@@ -2,7 +2,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../services/authService";
 import type { RegisterData } from "../types/auth";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser, FaPhone } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+  FaUser,
+  FaPhone,
+} from "react-icons/fa";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -62,7 +69,7 @@ const Register = () => {
 
     try {
       const response = await register(formData);
-      
+
       if (response.success && response.user) {
         // Redirect to home page after successful registration
         navigate("/");
@@ -149,7 +156,9 @@ const Register = () => {
               </div>
               {errors.fullName && (
                 <label className="label">
-                  <span className="label-text-alt text-error">{errors.fullName}</span>
+                  <span className="label-text-alt text-error">
+                    {errors.fullName}
+                  </span>
                 </label>
               )}
             </div>
@@ -179,7 +188,9 @@ const Register = () => {
               </div>
               {errors.email && (
                 <label className="label">
-                  <span className="label-text-alt text-error">{errors.email}</span>
+                  <span className="label-text-alt text-error">
+                    {errors.email}
+                  </span>
                 </label>
               )}
             </div>
@@ -188,7 +199,8 @@ const Register = () => {
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium text-gray-700">
-                  Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
+                  Phone Number{" "}
+                  <span className="text-gray-400 text-xs">(Optional)</span>
                 </span>
               </label>
               <div className="relative">
@@ -200,7 +212,7 @@ const Register = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="+20 123 456 7890"
                   className="input input-bordered w-full pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
               </div>
@@ -210,7 +222,8 @@ const Register = () => {
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium text-gray-700">
-                  Address <span className="text-gray-400 text-xs">(Optional)</span>
+                  Address{" "}
+                  <span className="text-gray-400 text-xs">(Optional)</span>
                 </span>
               </label>
               <input
@@ -255,7 +268,9 @@ const Register = () => {
               </div>
               {errors.password && (
                 <label className="label">
-                  <span className="label-text-alt text-error">{errors.password}</span>
+                  <span className="label-text-alt text-error">
+                    {errors.password}
+                  </span>
                 </label>
               )}
             </div>
@@ -297,7 +312,9 @@ const Register = () => {
               </div>
               {errors.confirmPassword && (
                 <label className="label">
-                  <span className="label-text-alt text-error">{errors.confirmPassword}</span>
+                  <span className="label-text-alt text-error">
+                    {errors.confirmPassword}
+                  </span>
                 </label>
               )}
             </div>
@@ -375,4 +392,3 @@ const Register = () => {
 };
 
 export default Register;
-

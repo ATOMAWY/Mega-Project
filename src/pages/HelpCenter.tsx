@@ -59,9 +59,9 @@ const HelpCenter = () => {
   ];
 
   const quickLinks = [
-    { icon: FaSearch, title: "Search Attractions", description: "Browse our collection of Cairo & Giza attractions" },
-    { icon: FaBook, title: "Travel Guide", description: "Learn about Egyptian history and culture" },
-    { icon: FaComments, title: "Contact Support", description: "Get help from our support team" },
+    { icon: FaSearch, title: "Search Attractions", description: "Browse our collection of Cairo & Giza attractions", path: "/browse" },
+    { icon: FaBook, title: "Travel Guide", description: "Learn about Egyptian history and culture", path: "/" },
+    { icon: FaComments, title: "Contact Support", description: "Get help from our support team", path: "/contact" },
   ];
 
   return (
@@ -87,16 +87,17 @@ const HelpCenter = () => {
             {quickLinks.map((link, index) => {
               const Icon = link.icon;
               return (
-                <div
+                <Link
                   key={index}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                  to={link.path}
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md hover:border-orange-400 transition-all cursor-pointer block"
                 >
                   <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
                     <Icon className="text-orange-400 text-xl" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">{link.title}</h3>
                   <p className="text-gray-600 text-sm">{link.description}</p>
-                </div>
+                </Link>
               );
             })}
           </div>
