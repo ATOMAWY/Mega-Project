@@ -12,6 +12,11 @@ export const attractions = [
     distance: "20 km",
     isFavorite: true,
     category: "Historical",
+    // Approximate values used for filtering – will later come from the API
+    price: 1500,
+    distanceKm: 20,
+    moods: ["Adventurous", "Historical", "Cultural"],
+    activityTypes: ["Historical Sites", "Outdoor Activities"],
   },
   {
     id: 2,
@@ -26,6 +31,10 @@ export const attractions = [
     distance: "2 km",
     isFavorite: false,
     category: "Historical",
+    price: 800,
+    distanceKm: 2,
+    moods: ["Cultural", "Historical"],
+    activityTypes: ["Historical Sites"],
   },
   {
     id: 3,
@@ -40,6 +49,10 @@ export const attractions = [
     distance: "280 km",
     isFavorite: false,
     category: "Historical",
+    price: 4000,
+    distanceKm: 280,
+    moods: ["Adventurous", "Cultural"],
+    activityTypes: ["Historical Sites", "Outdoor Activities"],
   },
   {
     id: 4,
@@ -54,6 +67,10 @@ export const attractions = [
     distance: "560 km",
     isFavorite: true,
     category: "Natural",
+    price: 2500,
+    distanceKm: 560,
+    moods: ["Relaxing", "Romantic", "Family-Friendly"],
+    activityTypes: ["Outdoor Activities"],
   },
   {
     id: 5,
@@ -68,5 +85,9 @@ export const attractions = [
     distance: "5 km",
     isFavorite: false,
     category: "Museum",
+    price: 500,
+    distanceKm: 5,
+    moods: ["Cultural", "Family-Friendly"],
+    activityTypes: ["Museums", "Art & Culture"],
   },
 ];

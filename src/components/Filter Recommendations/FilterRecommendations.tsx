@@ -1,23 +1,53 @@
 import { CiFilter } from "react-icons/ci";
-import { useState } from "react";
 
-const FilterRecommendations = () => {
-  const [budget, setBudget] = useState(50000);
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+type FilterState = {
+  budget: number;
+  selectedMoods: string[];
+  selectedActivityTypes: string[];
+  minRating: number;
+};
 
-  const moods = [
-    "Adventurous",
-    "Relaxing",
-    "Cultural",
-    "Romantic",
-    "Family-Friendly",
-    "Historical",
-  ];
+type Props = {
+  filters: FilterState;
+  onChange: (next: FilterState) => void;
+  onReset: () => void;
+  onApply?: () => void;
+};
 
+const moodOptions = [
+  "Adventurous",
+  "Relaxing",
+  "Cultural",
+  "Romantic",
+  "Family-Friendly",
+  "Historical",
+];
+
+const activityOptions = [
+  "Historical Sites",
+  "Museums",
+  "Shopping",
+  "Food Tours",
+  "Outdoor Activities",
+  "Nightlife",
+  "Art & Culture",
+];
+
+const FilterRecommendations = ({ filters, onChange, onReset, onApply }: Props) => {
   const toggleMood = (mood: string) => {
-    setSelectedMoods((prev) =>
-      prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood]
-    );
+    const exists = filters.selectedMoods.includes(mood);
+    const selectedMoods = exists
+      ? filters.selectedMoods.filter((m) => m !== mood)
+      : [...filters.selectedMoods, mood];
+    onChange({ ...filters, selectedMoods });
+  };
+
+  const toggleActivity = (activity: string) => {
+    const exists = filters.selectedActivityTypes.includes(activity);
+    const selectedActivityTypes = exists
+      ? filters.selectedActivityTypes.filter((a) => a !== activity)
+      : [...filters.selectedActivityTypes, activity];
+    onChange({ ...filters, selectedActivityTypes });
   };
 
   return (
@@ -32,12 +62,12 @@ const FilterRecommendations = () => {
             <div>
               <h2 className="text-xl font-bold mb-3">Mood</h2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                {moods.map((mood) => (
+                {moodOptions.map((mood) => (
                   <button
                     key={mood}
                     onClick={() => toggleMood(mood)}
                     className={`btn rounded-full text-md w-full justify-start ${
-                      selectedMoods.includes(mood)
+                      filters.selectedMoods.includes(mood)
                         ? "bg-orange-400 text-white hover:bg-orange-500"
                         : ""
                     }`}
@@ -53,17 +83,17 @@ const FilterRecommendations = () => {
                 type="range"
                 min={0}
                 max={50000}
-                value={budget}
-                onChange={(e) =>
-                  setBudget(Math.round(Number(e.target.value) / 100) * 100)
-                }
-                onClick={() => console.log(budget)}
+                value={filters.budget}
+                onChange={(e) => {
+                  const budget = Math.round(Number(e.target.value) / 100) * 100;
+                  onChange({ ...filters, budget });
+                }}
                 className="range range-xs [--range-shdw:orange]"
               />
               <p className="text-gray-500">
                 Budget Level:{" "}
                 <span className="font-bold">
-                  {budget.toLocaleString("en-US")} EGP
+                  {filters.budget.toLocaleString("en-US")} EGP
                 </span>
               </p>
             </div>
@@ -72,55 +102,17 @@ const FilterRecommendations = () => {
             <div className="my-5">
               <h2 className="text-xl font-bold mb-3">Activity Type</h2>
               <div className="form-control flex-col gap-1">
-                <label className="flex gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox [--chkbg:orange]"
-                  />
-                  <span className="items-start">Historical Sites</span>
-                </label>
-                <label className="flex gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox [--chkbg:orange]"
-                  />
-                  <span className="items-start">Museums</span>
-                </label>
-                <label className="flex gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox [--chkbg:orange]"
-                  />
-                  <span className="items-start">Shopping</span>
-                </label>
-                <label className="flex gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox [--chkbg:orange]"
-                  />
-                  <span className="items-start">Food Tours</span>
-                </label>
-                <label className="flex gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox [--chkbg:orange]"
-                  />
-                  <span className="items-start">Outdoor Activities</span>
-                </label>
-                <label className="flex gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox [--chkbg:orange]"
-                  />
-                  <span className="items-start">Nightlife</span>
-                </label>
-                <label className="flex gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox [--chkbg:orange]"
-                  />
-                  <span className="items-start">Art & Culture</span>
-                </label>
+                {activityOptions.map((activity) => (
+                  <label key={activity} className="flex gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="checkbox [--chkbg:orange]"
+                      checked={filters.selectedActivityTypes.includes(activity)}
+                      onChange={() => toggleActivity(activity)}
+                    />
+                    <span className="items-start">{activity}</span>
+                  </label>
+                ))}
               </div>
             </div>
             <div className="my-5">
@@ -129,7 +121,10 @@ const FilterRecommendations = () => {
                 <div className="flex w-full">
                   <select
                     className="select select-bordered w-full"
-                    defaultValue={"1"}
+                    value={filters.minRating.toString()}
+                    onChange={(e) =>
+                      onChange({ ...filters, minRating: Number(e.target.value) })
+                    }
                   >
                     <option value="5">5 Stars</option>
                     <option value="4">4 Stars</option>
@@ -144,12 +139,20 @@ const FilterRecommendations = () => {
         </div>
 
         <div className="flex flex-col gap-4 my-5">
-          <div className="btn bg-orange-400 align-middle justify-center text-white text-xl">
+          <button
+            type="button"
+            className="btn bg-orange-400 align-middle justify-center text-white text-xl"
+            onClick={onApply}
+          >
             Apply Filters
-          </div>
-          <div className="btn bg-white align-middle justify-center text-black text-xl">
+          </button>
+          <button
+            type="button"
+            className="btn bg-white align-middle justify-center text-black text-xl"
+            onClick={onReset}
+          >
             Reset Filters
-          </div>
+          </button>
         </div>
       </div>
     </div>
