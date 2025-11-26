@@ -110,7 +110,7 @@ const Register = () => {
 
         {/* Register Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {/* Error Message */}
             {error && (
               <div className="alert alert-error">

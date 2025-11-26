@@ -13,10 +13,34 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!credentials.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!credentials.password) {
+      newErrors.password = "Password is required";
+    }
+
+    setFieldErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -41,6 +65,10 @@ const Login = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCredentials((prev) => ({ ...prev, [name]: value }));
+
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   return (
@@ -58,7 +86,7 @@ const Login = () => {
 
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {/* Error Message */}
             {error && (
               <div className="alert alert-error">
@@ -96,10 +124,19 @@ const Login = () => {
                   value={credentials.email}
                   onChange={handleChange}
                   placeholder="your.email@example.com"
-                  className="input input-bordered w-full pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className={`input input-bordered w-full pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                    fieldErrors.email ? "input-error" : ""
+                  }`}
                   required
                 />
               </div>
+              {fieldErrors.email && (
+                <label className="label">
+                  <span className="label-text-alt text-error text-xs">
+                    {fieldErrors.email}
+                  </span>
+                </label>
+              )}
             </div>
 
             {/* Password Field */}
@@ -119,7 +156,9 @@ const Login = () => {
                   value={credentials.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className="input input-bordered w-full pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className={`input input-bordered w-full pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                    fieldErrors.password ? "input-error" : ""
+                  }`}
                   required
                 />
                 <button
@@ -130,6 +169,13 @@ const Login = () => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <label className="label">
+                  <span className="label-text-alt text-error text-xs">
+                    {fieldErrors.password}
+                  </span>
+                </label>
+              )}
             </div>
 
             {/* Remember Me & Forgot Password */}

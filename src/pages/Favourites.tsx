@@ -10,7 +10,6 @@ import {
 } from "../services/favoritesService";
 import type { LocalFavorite } from "../types/favorite";
 import { FaHeart, FaFilter } from "react-icons/fa";
-
 import { Link } from "react-router";
 
 type SortOption = "newest" | "oldest" | "rating" | "name";
