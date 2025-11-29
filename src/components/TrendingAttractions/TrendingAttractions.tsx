@@ -5,8 +5,6 @@ type Props = {
 };
 
 const TrendingAttractions = ({ attractions = [] }: Props) => {
-  console.log(attractions);
-
   return (
     <div className="items-center justify-center px-16">
       <h1 className="text-xl w-full text-left font-bold">
