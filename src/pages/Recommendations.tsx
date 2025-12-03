@@ -37,7 +37,7 @@ const Recommendations = () => {
   const [vibeTagsMap, setVibeTagsMap] = useState<Map<string, string[]>>(
     new Map()
   );
-  const [loadingVibeTags, setLoadingVibeTags] = useState(false);
+  const [_, setLoadingVibeTags] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortOption, setSortOption] = useState<SortOption>("rating-desc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,8 +77,7 @@ const Recommendations = () => {
             item.raw?.costTier ||
             "";
           return (
-            itemTier &&
-            itemTier.toLowerCase() === selectedTier.toLowerCase()
+            itemTier && itemTier.toLowerCase() === selectedTier.toLowerCase()
           );
         });
 
@@ -98,16 +97,18 @@ const Recommendations = () => {
       const matchesActivityTypes =
         !filters.selectedActivityTypes.length ||
         (item.category &&
-          filters.selectedActivityTypes.some((selectedCategory: string) =>
-            item.category.toLowerCase() === selectedCategory.toLowerCase()
+          filters.selectedActivityTypes.some(
+            (selectedCategory: string) =>
+              item.category.toLowerCase() === selectedCategory.toLowerCase()
           ));
 
       // Filter by Indoor/Outdoor (matching /api/Places/weather endpoint)
       const matchesIndoorOutdoor =
         !filters.selectedIndoorOutdoor.length ||
         (item.indoorOutdoor &&
-          filters.selectedIndoorOutdoor.some((selectedOption: string) =>
-            item.indoorOutdoor.toLowerCase() === selectedOption.toLowerCase()
+          filters.selectedIndoorOutdoor.some(
+            (selectedOption: string) =>
+              item.indoorOutdoor.toLowerCase() === selectedOption.toLowerCase()
           ));
 
       return (
