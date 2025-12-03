@@ -1,75 +1,89 @@
-# React + TypeScript + Vite
+🌆 CairoGo — AI Tourist Recommendation & Mini Trip Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CairoGo is an AI-powered tourist recommendation system designed to help travelers effortlessly explore the best attractions, restaurants, activities, and experiences across Cairo and Giza.
+Built with personalization, simplicity, and smart decision-making in mind, CairoGo delivers curated suggestions based on each user’s style, preferences, and trip details—without the complexity of a full itinerary engine.
 
-Currently, two official plugins are available:
+🚀 Features
+🎯 Smart Preference Quiz
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Users answer a quick onboarding quiz that captures key preferences:
 
-## React Compiler
+Travel Vibe (Romantic, Calm, Adventure, Photography, Foodie, Family-friendly)
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Weather Preferences (Indoor, Outdoor, Cold, Warm)
 
-Note: This will impact Vite dev & build performances.
+Budget (Low / Medium / High)
 
-## Expanding the ESLint configuration
+Group Size
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Trip Duration (Number of days)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Activity Types (Dining, Shopping, Cultural, Nature, Entertainment)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+This powers CairoGo’s personalized recommendation engine.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+🤖 AI-Driven Recommendation Engine
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+CairoGo blends:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Content-based filtering (matching user preferences with place attributes)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Light behavioral learning (likes, favorites, views)
+
+The result: accurate, evolving suggestions for attractions, cafés, restaurants, and activities across Cairo and Giza.
+
+🗺️ Smart Mini Trip Planner (Simplified, Fast, Effective)
+
+A major highlight of CairoGo is its Smart Mini Trip Planner—a lightweight, multi-day organizer that feels like a real itinerary tool but is simple enough to build in two weeks.
+
+The planner automatically generates:
+
+Structured Morning / Afternoon / Evening daily plans
+
+Activity selections based on vibe, weather, budget, and interests
+
+Suggestions suitable for couples, families, or groups
+
+Estimated daily and total trip costs (per person + total)
+
+Optional recommended cafés/food stops
+
+Indoor/outdoor alternatives
+
+It does not do route optimization—just clean, curated planning that users understand and enjoy.
+
+🔍 Additional Smart Features
+🌈 Mood-Based Search
+
+Instantly browse locations based on a chosen vibe or theme.
+
+💸 Budget Filter
+
+Quickly filter places by cost tiers.
+
+⭐ Trending & Discovery Feed
+
+See what’s popular now, discover hidden gems, and explore category-based suggestions.
+
+❤️ Favorites & Wishlist
+
+Save places and build your personal travel shortlist.
+
+🧾 Basic Expense Tracker
+
+Log and review spending throughout the trip.
+
+🎉 Project Value
+
+CairoGo strikes the perfect balance between ambition and feasibility.
+It provides:
+
+AI-driven personalization
+
+Clean multi-day planning
+
+Lightweight but smart interaction features
+
+A polished, intuitive user experience
+
+All achievable within a realistic two-week development window.
