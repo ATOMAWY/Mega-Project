@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import RecommendedCards from "../components/Recommended Cards/RecommendedCards";
-import { attractions } from "../data/attractions";
+import { fetchAttractions, type Attraction } from "../data/attractions";
 import {
   getFavorites,
   removeFavorite,
@@ -17,11 +17,17 @@ type FilterOption = "all" | string; // "all" or category name
 
 const Favourites = () => {
   const [favorites, setFavorites] = useState<LocalFavorite[]>([]);
+  const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<FilterOption>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [editingCategory, setEditingCategory] = useState<number | null>(null);
   const [newCategory, setNewCategory] = useState("");
+
+  // Load attractions
+  useEffect(() => {
+    fetchAttractions().then(setAttractions);
+  }, []);
 
   // Load favorites and listen for updates
   useEffect(() => {
@@ -64,7 +70,7 @@ const Favourites = () => {
           favoriteData: favorite,
         };
       });
-  }, [favorites]);
+  }, [favorites, attractions]);
 
   // Get unique categories from attractions
   const availableCategories = useMemo(() => {

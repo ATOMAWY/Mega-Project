@@ -202,7 +202,7 @@ const Login = () => {
               className="btn btn-primary w-full bg-orange-400 hover:bg-orange-500 border-none text-white font-medium py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <span className="loading loading-spinner loading-sm"></span>
+                <div className="spinner-orange-sm"></div>
               ) : (
                 "Sign In"
               )}

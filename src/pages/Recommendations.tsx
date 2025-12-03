@@ -3,7 +3,8 @@ import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import FilterRecommendations from "./../components/Filter Recommendations/FilterRecommendations";
 import RecommendedCards from "./../components/Recommended Cards/RecommendedCards";
-import { attractions as staticAttractions } from "../data/attractions";
+import { fetchAttractions, type Attraction } from "../data/attractions";
+import { fetchVibeTagsForPlaces } from "../services/vibeTagsService";
 
 type SortOption =
   | "rating-desc"
@@ -32,10 +33,30 @@ const ITEMS_PER_PAGE = 12;
 
 const Recommendations = () => {
   // In the future this can be replaced with data from an API / database.
-  const [allAttractions] = useState(staticAttractions);
+  const [allAttractions, setAllAttractions] = useState<Attraction[]>([]);
+  const [vibeTagsMap, setVibeTagsMap] = useState<Map<string, string[]>>(
+    new Map()
+  );
+  const [loadingVibeTags, setLoadingVibeTags] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortOption, setSortOption] = useState<SortOption>("rating-desc");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Fetch attractions
+  useEffect(() => {
+    fetchAttractions().then(setAllAttractions);
+  }, []);
+
+  // Fetch vibe tags for all attractions when they're loaded
+  useEffect(() => {
+    if (allAttractions.length > 0) {
+      setLoadingVibeTags(true);
+      const placeIds = allAttractions.map((attr) => attr.placeId);
+      fetchVibeTagsForPlaces(placeIds)
+        .then(setVibeTagsMap)
+        .finally(() => setLoadingVibeTags(false));
+    }
+  }, [allAttractions]);
 
   const filteredAttractions = useMemo(() => {
     let list = [...allAttractions];
@@ -61,17 +82,17 @@ const Recommendations = () => {
           );
         });
 
-      // Filter by moods (matching /api/Places/vibe endpoint)
-      // Check if any selected mood matches any mood in the item's moods array (case-insensitive)
+      // Filter by moods using /api/PlaceVibeTag/place/{placeId} endpoint
+      // Get vibe tags from the API response (cached)
+      const placeVibeTags = vibeTagsMap.get(item.placeId) || [];
       const matchesMoods =
         !filters.selectedMoods.length ||
-        (Array.isArray(item.moods) &&
-          item.moods.some((m: string) =>
-            filters.selectedMoods.some(
-              (selectedMood: string) =>
-                m.toLowerCase() === selectedMood.toLowerCase()
-            )
-          ));
+        placeVibeTags.some((vibeTag: string) =>
+          filters.selectedMoods.some(
+            (selectedMood: string) =>
+              vibeTag.toLowerCase() === selectedMood.toLowerCase()
+          )
+        );
 
       // Filter by category (matching /api/Places/category endpoint)
       const matchesActivityTypes =
@@ -117,7 +138,7 @@ const Recommendations = () => {
     });
 
     return list;
-  }, [allAttractions, filters, sortOption]);
+  }, [allAttractions, filters, sortOption, vibeTagsMap]);
 
   // Reset to first page when filters or sort option changes
   useEffect(() => {

@@ -1,7 +1,7 @@
 import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import RecommendedCards from "./../components/Recommended Cards/RecommendedCards";
-import { attractions } from "../data/attractions";
+import { fetchAttractions, type Attraction } from "../data/attractions";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -12,6 +12,11 @@ const Browse = () => {
   const initialQuery = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [currentPage, setCurrentPage] = useState(1);
+  const [attractions, setAttractions] = useState<Attraction[]>([]);
+
+  useEffect(() => {
+    fetchAttractions().then(setAttractions);
+  }, []);
 
   useEffect(() => {
     const urlQuery = searchParams.get("search") || "";
@@ -29,7 +34,7 @@ const Browse = () => {
             .includes(searchQuery.toLowerCase()) ||
           attraction.category.toLowerCase().includes(searchQuery.toLowerCase())
       ),
-    [searchQuery]
+    [searchQuery, attractions]
   );
 
   const totalPages = Math.ceil(filteredAttractions.length / ITEMS_PER_PAGE);

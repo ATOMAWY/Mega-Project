@@ -184,34 +184,61 @@ const mapApiToAttraction = (
   };
 };
 
-// Fetch attractions from API with error handling
-let attractions: Attraction[] = [];
+// Cache for fetched attractions
+let attractionsCache: Attraction[] | null = null;
+let attractionsPromise: Promise<Attraction[]> | null = null;
 
-try {
-  const response = await fetch(`${API_URL}/api/places`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    console.error("Error fetching attractions data:", response.statusText);
-    throw new Error(`Failed to fetch attractions: ${response.statusText}`);
+// Async function to fetch attractions from API
+export const fetchAttractions = async (): Promise<Attraction[]> => {
+  // Return cached data if available
+  if (attractionsCache) {
+    return attractionsCache;
   }
 
-  const data: unknown = await response.json();
+  // Return existing promise if fetch is in progress
+  if (attractionsPromise) {
+    return attractionsPromise;
+  }
 
-  attractions = Array.isArray(data)
-    ? data.map((item, index) => mapApiToAttraction(item as ApiAttraction, index))
-    : [];
-} catch (error) {
-  console.error("Error fetching attractions from API:", error);
-  console.warn("Using empty array as fallback. Please check:");
-  console.warn("1. Backend server is running at", API_URL);
-  console.warn("2. CORS is properly configured on the backend");
-  console.warn("3. API endpoint is correct:", `${API_URL}/api/places`);
-  attractions = [];
-}
+  // Start new fetch
+  attractionsPromise = (async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/places`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-export { attractions };
+      if (!response.ok) {
+        console.error("Error fetching attractions data:", response.statusText);
+        throw new Error(`Failed to fetch attractions: ${response.statusText}`);
+      }
+
+      const data: unknown = await response.json();
+
+      const attractions = Array.isArray(data)
+        ? data.map((item, index) => mapApiToAttraction(item as ApiAttraction, index))
+        : [];
+
+      attractionsCache = attractions;
+      return attractions;
+    } catch (error) {
+      console.error("Error fetching attractions from API:", error);
+      console.warn("Using empty array as fallback. Please check:");
+      console.warn("1. Backend server is running at", API_URL);
+      console.warn("2. CORS is properly configured on the backend");
+      console.warn("3. API endpoint is correct:", `${API_URL}/api/places`);
+      attractionsCache = [];
+      return [];
+    } finally {
+      attractionsPromise = null;
+    }
+  })();
+
+  return attractionsPromise;
+};
+
+// Export empty array initially (non-blocking)
+// Components should use fetchAttractions() to get data
+export const attractions: Attraction[] = [];

@@ -211,7 +211,7 @@ const ContactUs = () => {
                     className="btn w-full bg-orange-400 hover:bg-orange-500 border-none text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
-                      <span className="loading loading-spinner loading-sm"></span>
+                      <div className="spinner-orange-sm"></div>
                     ) : (
                       <>
                         <FaPaperPlane className="mr-2" />

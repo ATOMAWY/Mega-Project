@@ -3,7 +3,7 @@ import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import TrendingAttractions from "../components/TrendingAttractions/TrendingAttractions";
 import HiddenGems from "../components/HiddenGems/HiddenGems";
-import { attractions } from "../data/attractions";
+import { fetchAttractions, type Attraction } from "../data/attractions";
 import { LuPiggyBank } from "react-icons/lu";
 import { TbMapRoute } from "react-icons/tb";
 import { FaHeart } from "react-icons/fa";
@@ -22,39 +22,18 @@ const AttractionDetails = () => {
   const navigate = useNavigate();
   const [isFavoriteState, setIsFavoriteState] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
+  const [attractions, setAttractions] = useState<Attraction[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Find the attraction by id
   const attractionId = id ? parseInt(id) : null;
-  const attraction =
-    attractions.find((attr) => attr.id === attractionId) || null;
 
-  // If attraction not found, show error or redirect
-  if (!attraction) {
-    return (
-      <div className="overflow-x-hidden">
-        <NavBar />
-        <div className="mx-4 sm:mx-6 lg:mx-20 mt-8">
-          <h1 className="text-3xl font-bold mb-4">Attraction Not Found</h1>
-          <button
-            onClick={() => navigate("/browse")}
-            className="btn bg-orange-400 text-white"
-          >
-            Back to Browse
-          </button>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  const roundedRating = Math.max(
-    0,
-    Math.min(5, Math.round(attraction.rating ?? 0))
-  );
-  const formatedRating = (Math.round(attraction.rating * 10) / 10).toFixed(1);
-  const stars = Array.from({ length: 5 }, (_, i) =>
-    i < roundedRating ? "★" : "☆"
-  ).join("");
+  useEffect(() => {
+    fetchAttractions().then((data) => {
+      setAttractions(data);
+      setLoading(false);
+    });
+  }, []);
 
   // Initialize favorite state from localStorage
   useEffect(() => {
@@ -80,6 +59,44 @@ const AttractionDetails = () => {
     };
   }, [attractionId]);
 
+  // Find the attraction by id (after all hooks)
+  const attraction =
+    attractions.find((attr) => attr.id === attractionId) || null;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="overflow-x-hidden">
+        <NavBar />
+        <div className="mx-4 sm:mx-6 lg:mx-20 mt-8">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="spinner-orange"></div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // If attraction not found, show error or redirect
+  if (!attraction) {
+    return (
+      <div className="overflow-x-hidden">
+        <NavBar />
+        <div className="mx-4 sm:mx-6 lg:mx-20 mt-8">
+          <h1 className="text-3xl font-bold mb-4">Attraction Not Found</h1>
+          <button
+            onClick={() => navigate("/browse")}
+            className="btn bg-orange-400 text-white"
+          >
+            Back to Browse
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const toggleFavorite = () => {
     if (attractionId !== null) {
       const newState = toggleFavoriteService(attractionId);
@@ -91,6 +108,15 @@ const AttractionDetails = () => {
   const otherAttractions = attractions.filter(
     (attr) => attr.id !== attractionId
   );
+
+  const roundedRating = Math.max(
+    0,
+    Math.min(5, Math.round(attraction.rating ?? 0))
+  );
+  const formatedRating = (Math.round(attraction.rating * 10) / 10).toFixed(1);
+  const stars = Array.from({ length: 5 }, (_, i) =>
+    i < roundedRating ? "★" : "☆"
+  ).join("");
 
   return (
     <div className="overflow-x-hidden bg-slate-50 min-h-screen">

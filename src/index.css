@@ -21,3 +21,33 @@ a {
     "Segoe UI Symbol", "Noto Color Emoji";
   font-optical-sizing: auto;
 }
+
+/* Custom orange spinner with smooth animation */
+@keyframes spin-smooth {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-orange {
+  border: 4px solid rgba(251, 146, 60, 0.2); /* orange-400 with opacity */
+  border-top-color: rgb(251, 146, 60); /* orange-400 */
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin-smooth 0.8s linear infinite;
+  will-change: transform;
+}
+
+.spinner-orange-sm {
+  border: 3px solid rgba(251, 146, 60, 0.2);
+  border-top-color: rgb(251, 146, 60);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin-smooth 0.8s linear infinite;
+  will-change: transform;
+}
