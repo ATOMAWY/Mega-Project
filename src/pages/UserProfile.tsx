@@ -7,7 +7,7 @@ import type { User } from "../types/auth";
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [_, setCurrentUser] = useState<User | null>(null);
   const [userInfo, setUserInfo] = useState({
     fullName: "",
     email: "",
@@ -70,7 +70,9 @@ const UserProfile = () => {
           >
             <FaBars className="text-xl" />
           </button>
-          <h1 className="text-lg sm:text-xl font-normal text-gray-700">User Profile</h1>
+          <h1 className="text-lg sm:text-xl font-normal text-gray-700">
+            User Profile
+          </h1>
         </div>
         <div className="avatar">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full">
@@ -86,7 +88,9 @@ const UserProfile = () => {
         {/* Sidebar - Mobile Drawer */}
         <div
           className={`fixed lg:relative inset-y-0 left-0 z-50 w-64 lg:w-48 bg-white border-r transform transition-transform duration-300 ease-in-out ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            isMobileMenuOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
           }`}
         >
           <div className="py-6">
@@ -150,11 +154,15 @@ const UserProfile = () => {
             {/* User Profile Card */}
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-semibold mb-6">User Profile</h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-6">
+                  User Profile
+                </h2>
 
                 {/* Profile Picture Section */}
                 <div className="mb-8 pb-8 border-b">
-                  <h3 className="text-sm sm:text-base font-semibold mb-4">Profile Picture</h3>
+                  <h3 className="text-sm sm:text-base font-semibold mb-4">
+                    Profile Picture
+                  </h3>
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                     <div className="avatar">
                       <div className="w-20 h-20 sm:w-16 sm:h-16 rounded-full">
@@ -178,7 +186,9 @@ const UserProfile = () => {
                   <div className="space-y-4">
                     {/* Full Name */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
-                      <span className="text-sm text-gray-600 sm:w-32">Full Name</span>
+                      <span className="text-sm text-gray-600 sm:w-32">
+                        Full Name
+                      </span>
                       <div className="flex items-center gap-4 flex-1">
                         {isEditing === "fullName" ? (
                           <>
@@ -216,7 +226,9 @@ const UserProfile = () => {
 
                     {/* Email Address */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
-                      <span className="text-sm text-gray-600 sm:w-32">Email Address</span>
+                      <span className="text-sm text-gray-600 sm:w-32">
+                        Email Address
+                      </span>
                       <div className="flex items-center gap-4 flex-1">
                         {isEditing === "email" ? (
                           <>
@@ -240,7 +252,9 @@ const UserProfile = () => {
                               {userInfo.email}
                             </span>
                             <button
-                              onClick={() => handleEdit("email", userInfo.email)}
+                              onClick={() =>
+                                handleEdit("email", userInfo.email)
+                              }
                               className="text-sm text-orange-500 hover:underline whitespace-nowrap"
                             >
                               Edit
@@ -252,7 +266,9 @@ const UserProfile = () => {
 
                     {/* Phone Number */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
-                      <span className="text-sm text-gray-600 sm:w-32">Phone Number</span>
+                      <span className="text-sm text-gray-600 sm:w-32">
+                        Phone Number
+                      </span>
                       <div className="flex items-center gap-4 flex-1">
                         {isEditing === "phoneNumber" ? (
                           <>
@@ -290,7 +306,9 @@ const UserProfile = () => {
 
                     {/* Address */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
-                      <span className="text-sm text-gray-600 sm:w-32">Address</span>
+                      <span className="text-sm text-gray-600 sm:w-32">
+                        Address
+                      </span>
                       <div className="flex items-center gap-4 flex-1">
                         {isEditing === "address" ? (
                           <>
@@ -330,10 +348,14 @@ const UserProfile = () => {
 
                 {/* Preferences */}
                 <div className="mb-8 pb-8 border-b">
-                  <h3 className="text-sm sm:text-base font-semibold mb-4">Preferences</h3>
+                  <h3 className="text-sm sm:text-base font-semibold mb-4">
+                    Preferences
+                  </h3>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">Receive Email Notifications</span>
+                      <span className="text-sm text-gray-900">
+                        Receive Email Notifications
+                      </span>
                       <input
                         type="checkbox"
                         className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
@@ -342,7 +364,9 @@ const UserProfile = () => {
                       />
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">Enable Dark Mode</span>
+                      <span className="text-sm text-gray-900">
+                        Enable Dark Mode
+                      </span>
                       <input
                         type="checkbox"
                         className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
@@ -351,7 +375,9 @@ const UserProfile = () => {
                       />
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">Show Travel Reminders</span>
+                      <span className="text-sm text-gray-900">
+                        Show Travel Reminders
+                      </span>
                       <input
                         type="checkbox"
                         className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
@@ -364,7 +390,9 @@ const UserProfile = () => {
 
                 {/* Account Details */}
                 <div className="mb-6">
-                  <h3 className="text-sm sm:text-base font-semibold mb-4">Account Details</h3>
+                  <h3 className="text-sm sm:text-base font-semibold mb-4">
+                    Account Details
+                  </h3>
                   <button className="text-sm text-orange-500 hover:underline mb-3 block">
                     Change Password
                   </button>

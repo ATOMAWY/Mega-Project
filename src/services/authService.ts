@@ -2,23 +2,31 @@
 // Currently uses localStorage for demo, but structured to easily switch to API calls
 // When database is available, replace localStorage calls with API calls
 
-import type { LoginCredentials, RegisterData, AuthResponse, User, AuthState } from "../types/auth";
+import type {
+  LoginCredentials,
+  RegisterData,
+  AuthResponse,
+  User,
+  AuthState,
+} from "../types/auth";
 
 const AUTH_TOKEN_KEY = "auth_token";
 const USER_DATA_KEY = "user_data";
 const AUTH_STATE_KEY = "auth_state";
 
 // API endpoints (to be configured when backend is ready)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-const LOGIN_ENDPOINT = `${API_BASE_URL}/auth/login`;
-const REGISTER_ENDPOINT = `${API_BASE_URL}/auth/register`;
-const LOGOUT_ENDPOINT = `${API_BASE_URL}/auth/logout`;
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+// const LOGIN_ENDPOINT = `${API_BASE_URL}/auth/login`;
+// const REGISTER_ENDPOINT = `${API_BASE_URL}/auth/register`;
+// const LOGOUT_ENDPOINT = `${API_BASE_URL}/auth/logout`;
 
 /**
  * Login user
  * Currently uses localStorage, but ready for API integration
  */
-export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
+export const login = async (
+  credentials: LoginCredentials
+): Promise<AuthResponse> => {
   // TODO: Replace with actual API call when backend is ready
   // Example:
   // try {
@@ -29,19 +37,19 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
   //     },
   //     body: JSON.stringify(credentials),
   //   });
-  //   
+  //
   //   if (!response.ok) {
   //     const error = await response.json();
   //     return { success: false, message: error.message || "Login failed" };
   //   }
-  //   
+  //
   //   const data = await response.json();
   //   const { user, token } = data;
-  //   
+  //
   //   // Store auth data
   //   localStorage.setItem(AUTH_TOKEN_KEY, token);
   //   localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
-  //   
+  //
   //   return { success: true, user, token };
   // } catch (error) {
   //   console.error("Login error:", error);
@@ -55,12 +63,12 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
 
     // Check if user exists in localStorage (demo)
     const storedUsers = localStorage.getItem("demo_users");
-    const users: Array<{ email: string; password: string; user: User }> = storedUsers
-      ? JSON.parse(storedUsers)
-      : [];
+    const users: Array<{ email: string; password: string; user: User }> =
+      storedUsers ? JSON.parse(storedUsers) : [];
 
     const foundUser = users.find(
-      (u) => u.email === credentials.email && u.password === credentials.password
+      (u) =>
+        u.email === credentials.email && u.password === credentials.password
     );
 
     if (!foundUser) {
@@ -103,19 +111,19 @@ export const register = async (data: RegisterData): Promise<AuthResponse> => {
   //     },
   //     body: JSON.stringify(data),
   //   });
-  //   
+  //
   //   if (!response.ok) {
   //     const error = await response.json();
   //     return { success: false, message: error.message || "Registration failed" };
   //   }
-  //   
+  //
   //   const data = await response.json();
   //   const { user, token } = data;
-  //   
+  //
   //   // Store auth data
   //   localStorage.setItem(AUTH_TOKEN_KEY, token);
   //   localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
-  //   
+  //
   //   return { success: true, user, token };
   // } catch (error) {
   //   console.error("Registration error:", error);
@@ -129,9 +137,8 @@ export const register = async (data: RegisterData): Promise<AuthResponse> => {
 
     // Check if user already exists
     const storedUsers = localStorage.getItem("demo_users");
-    const users: Array<{ email: string; password: string; user: User }> = storedUsers
-      ? JSON.parse(storedUsers)
-      : [];
+    const users: Array<{ email: string; password: string; user: User }> =
+      storedUsers ? JSON.parse(storedUsers) : [];
 
     if (users.some((u) => u.email === data.email)) {
       return { success: false, message: "Email already registered" };
@@ -212,7 +219,7 @@ export const getToken = (): string | null => {
  */
 export const getCurrentUser = (): User | null => {
   if (typeof window === "undefined") return null;
-  
+
   try {
     const userData = localStorage.getItem(USER_DATA_KEY);
     if (!userData) return null;
@@ -258,4 +265,3 @@ export const getAuthState = (): AuthState => {
     token,
   };
 };
-
