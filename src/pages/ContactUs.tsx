@@ -1,7 +1,12 @@
 import { useState } from "react";
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
-import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaPaperPlane } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaPaperPlane,
+} from "react-icons/fa";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +18,11 @@ const ContactUs = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -21,7 +30,7 @@ const ContactUs = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false);
@@ -59,7 +68,9 @@ const ContactUs = () => {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-3">Contact Us</h1>
+            <h1 className="text-4xl font-bold text-gray-800 mb-3">
+              Contact Us
+            </h1>
             <p className="text-lg text-gray-600">
               Have a question or feedback? We'd love to hear from you!
             </p>
@@ -78,7 +89,9 @@ const ContactUs = () => {
                     <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
                       <Icon className="text-orange-400 text-xl" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">{info.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      {info.title}
+                    </h3>
                     {info.link ? (
                       <a
                         href={info.link}
@@ -112,14 +125,18 @@ const ContactUs = () => {
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span>Thank you! Your message has been sent successfully.</span>
+                    <span>
+                      Thank you! Your message has been sent successfully.
+                    </span>
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium text-gray-700">Name</span>
+                      <span className="label-text font-medium text-gray-700">
+                        Name
+                      </span>
                     </label>
                     <input
                       type="text"
@@ -134,7 +151,9 @@ const ContactUs = () => {
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium text-gray-700">Email</span>
+                      <span className="label-text font-medium text-gray-700">
+                        Email
+                      </span>
                     </label>
                     <input
                       type="email"
@@ -149,7 +168,9 @@ const ContactUs = () => {
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium text-gray-700">Subject</span>
+                      <span className="label-text font-medium text-gray-700">
+                        Subject
+                      </span>
                     </label>
                     <select
                       name="subject"
@@ -169,7 +190,9 @@ const ContactUs = () => {
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium text-gray-700">Message</span>
+                      <span className="label-text font-medium text-gray-700">
+                        Message
+                      </span>
                     </label>
                     <textarea
                       name="message"
@@ -208,4 +231,3 @@ const ContactUs = () => {
 };
 
 export default ContactUs;
-
