@@ -87,7 +87,7 @@ const NavBar = () => {
               <a>Trip Planner</a>
             </li>
             <li>
-              <a>Favourites</a>
+              <Link to="/favourites">Favourites</Link>
             </li>
             <li>
               <Link
@@ -159,10 +159,10 @@ const NavBar = () => {
           <FaCalendarAlt />
           Trip Planner
         </a>
-        <a className="btn btn-ghost text-sm">
+        <Link to="/favourites" className="btn btn-ghost text-sm">
           <FaRegHeart />
           Favourites
-        </a>
+        </Link>
       </div>
 
       {/* beginning of profile section */}
