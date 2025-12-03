@@ -126,7 +126,7 @@ const AdvancedCard = ({
 
   return (
     <div
-      className={`w-96 h-[510px] rounded overflow-hidden shadow-md bg-white flex flex-col ${
+      className={`w-96 h-[550px] rounded overflow-hidden shadow-md bg-white flex flex-col ${
         className ?? ""
       }`}
     >
