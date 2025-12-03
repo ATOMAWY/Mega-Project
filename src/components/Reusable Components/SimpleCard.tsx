@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 type Props = {
   photo: string;
@@ -21,6 +22,7 @@ export const SimpleCard = ({
   className,
   id,
 }: Props) => {
+  const [hasImageError, setHasImageError] = useState(false);
   const roundedRating = Math.max(0, Math.min(5, Math.round(rating ?? 0)));
   const formatedRating = (Math.round(rating * 10) / 10).toFixed(1);
   const stars = Array.from({ length: 5 }, (_, i) =>
@@ -33,11 +35,15 @@ export const SimpleCard = ({
         className ?? ""
       }`}
     >
-      {photo ? (
+      {photo && !hasImageError ? (
         <img
           src={photo}
           alt={title ?? "Card image"}
           className="w-full h-48 object-cover flex-shrink-0"
+          onError={() => {
+            // If the image fails to load, fall back to the placeholder block below
+            setHasImageError(true);
+          }}
         />
       ) : (
         <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">

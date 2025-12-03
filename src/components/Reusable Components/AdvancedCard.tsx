@@ -52,6 +52,7 @@ const AdvancedCard = ({
   onCategoryCancel,
 }: Props) => {
   const [favoriteState, setFavoriteState] = useState(initialIsFavorite);
+  const [hasImageError, setHasImageError] = useState(false);
 
   // Sync favorite state with localStorage
   useEffect(() => {
@@ -125,15 +126,19 @@ const AdvancedCard = ({
 
   return (
     <div
-      className={`w-96 h-[520px] rounded overflow-hidden shadow-md bg-white flex flex-col ${
+      className={`w-96 h-[510px] rounded overflow-hidden shadow-md bg-white flex flex-col ${
         className ?? ""
       }`}
     >
-      {photo ? (
+      {photo && !hasImageError ? (
         <img
           src={photo}
           alt={title ?? "Card image"}
           className="w-full h-48 object-cover flex-shrink-0"
+          onError={() => {
+            // If the image fails to load, fall back to the placeholder block below
+            setHasImageError(true);
+          }}
         />
       ) : (
         <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">
@@ -225,7 +230,7 @@ const AdvancedCard = ({
         )}
       </div>
 
-      <div className="flex text-md flex-shrink-0">
+      <div className="flex text-md flex-shrink-0 justify-between">
         <div className="flex items-center space-x-2 px-6 pb-4">
           <div className="text-orange-400">
             <LuPiggyBank />
@@ -236,7 +241,7 @@ const AdvancedCard = ({
           <div className="text-orange-400">
             <TbMapRoute />
           </div>
-          <div>{distance} from Cairo</div>
+          <div>{distance}</div>
         </div>
       </div>
 

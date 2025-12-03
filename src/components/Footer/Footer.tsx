@@ -28,9 +28,9 @@ const Footer = () => {
     <footer className="bg-gray-100 text-gray-700 mt-16">
       {/* Main Footer Content */}
       <div className="container mx-auto px-6 py-12 lg:px-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 ">
           {/* Brand Description Section */}
-          <div className="space-y-4">
+          <div className="space-y-4 flex flex-col justify-center align-middle ">
             <h3 className="text-xl font-bold text-gray-800">
               <span className="text-orange-400">Cairo & Giza</span>{" "}
               <span className="text-gray-800">AI Travel</span>
@@ -38,6 +38,8 @@ const Footer = () => {
             <p className="text-gray-600 leading-relaxed text-sm">
               Your AI-powered guide to Cairo & Giza.
             </p>
+
+            <img src="src\media\CairoGO_logo (1).svg" className="w-2/6" />
           </div>
 
           {/* Explore Section */}

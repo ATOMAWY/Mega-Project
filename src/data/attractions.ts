@@ -1,4 +1,6 @@
 const API_URL = import.meta.env.VITE_API;
+// Backend origin used when rewriting absolute URLs to go through a dev proxy
+const BACKEND_ORIGIN = "http://cairogo.runasp.net";
 
 // Raw attraction coming from the backend API
 type ApiAttraction = {
@@ -51,6 +53,8 @@ export type Attraction = {
   level: string;
   /** Distance label shown in cards – currently a friendly location string */
   distance: string;
+  /** High-level area / district within the city */
+  district?: string;
   /** Numeric price estimation used by recommendations sorting / filtering */
   price?: number;
   /** Approximate distance in KM – optional, used for sorting only */
@@ -59,6 +63,15 @@ export type Attraction = {
   moods?: string[];
   /** Mapped from activities */
   activityTypes?: string[];
+  /** Additional place metadata surfaced in details page */
+  website?: string;
+  phoneNumber?: string | null;
+  accessibilityInfo?: string;
+  parkingInfo?: string;
+  bestTimeToVisit?: string;
+  indoorOutdoor?: string;
+  bestTimeOfDay?: string;
+  avgVisitDurationMinutes?: number;
   /** Keep the original API object around in case we need extra fields */
   raw: ApiAttraction;
 };
@@ -81,22 +94,34 @@ const mapCostTierToPrice = (costTier?: string): number | undefined => {
 const normaliseImageUrl = (rawUrl?: string): string | undefined => {
   if (!rawUrl) return undefined;
 
-  // If it's already an absolute URL, use it as-is
-  if (/^https?:\/\//i.test(rawUrl)) {
-    return rawUrl;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return undefined;
+
+  // If it's already an absolute URL, optionally rewrite it to go through the dev proxy
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const absolute = new URL(trimmed);
+
+      // If we're using a Vite proxy (API_URL starts with "/") and this URL already
+      // points at our backend origin, rewrite it so the browser calls the proxy
+      if (API_URL?.startsWith("/") && absolute.origin === BACKEND_ORIGIN) {
+        const base = API_URL.replace(/\/$/, "");
+        return `${base}${absolute.pathname}${absolute.search}${absolute.hash}`;
+      }
+
+      return trimmed;
+    } catch {
+      return trimmed;
+    }
   }
 
   // Otherwise treat it as a path on the backend API host
   try {
-    const base = API_URL?.toString() ?? "";
-    if (!base) return rawUrl;
-
-    // Ensure we don't end up with double slashes
-    const separator =
-      base.endsWith("/") || rawUrl.startsWith("/") ? "" : "/";
-    return `${base}${separator}${rawUrl}`;
+    if (!API_URL) return trimmed;
+    const resolved = new URL(trimmed, API_URL);
+    return resolved.href;
   } catch {
-    return rawUrl;
+    return trimmed;
   }
 };
 
@@ -116,6 +141,14 @@ const mapApiToAttraction = (
     rating,
     vibeTags,
     activities,
+    website,
+    phoneNumber,
+    accessibilityInfo,
+    parkingInfo,
+    bestTimeToVisit,
+    indoorOutdoor,
+    bestTimeOfDay,
+    avgVisitDurationMinutes,
   } = apiAttraction;
 
   const safeRating = typeof rating === "number" ? rating : 0;
@@ -133,11 +166,20 @@ const mapApiToAttraction = (
     level: costTier || "Varies",
     // We don't get real distance from the API yet, so show the district / area
     distance: district || "Cairo",
+    district,
     price: mapCostTierToPrice(costTier),
     // No real distance data yet – can be wired once backend exposes it
     distanceKm: undefined,
     moods: Array.isArray(vibeTags) ? vibeTags : [],
     activityTypes: Array.isArray(activities) ? activities : [],
+    website,
+    phoneNumber: phoneNumber ?? null,
+    accessibilityInfo,
+    parkingInfo,
+    bestTimeToVisit,
+    indoorOutdoor,
+    bestTimeOfDay,
+    avgVisitDurationMinutes,
     raw: apiAttraction,
   };
 };
