@@ -2,27 +2,40 @@ import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import RecommendedCards from "./../components/Recommended Cards/RecommendedCards";
 import { attractions } from "../data/attractions";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+
+const ITEMS_PER_PAGE = 12;
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const urlQuery = searchParams.get("search") || "";
     setSearchQuery(urlQuery);
+    setCurrentPage(1); // Reset to first page when search changes
   }, [searchParams]);
 
-  const filteredAttractions = attractions.filter(
-    (attraction) =>
-      attraction.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      attraction.description
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      attraction.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAttractions = useMemo(
+    () =>
+      attractions.filter(
+        (attraction) =>
+          attraction.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          attraction.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          attraction.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [searchQuery]
   );
+
+  const totalPages = Math.ceil(filteredAttractions.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedAttractions = filteredAttractions.slice(startIndex, endIndex);
 
   return (
     <div className="overflow-x-hidden">
@@ -61,26 +74,36 @@ const Browse = () => {
         />
       </div>
 
-      <div className="flex justify-end items-end mx-4 sm:mx-6 lg:mx-20">
-        <div className="flex w-full sm:w-auto">
-          <select
-            className="select select-bordered w-full max-w-xs"
-            defaultValue={"1"}
-          >
-            <option value="1">Rating: High to Low</option>
-            <option value="2">Rating: Low to High</option>
-            <option value="3">Budget: High to Low</option>
-            <option value="4">Budget: Low to High</option>
-            <option value="5">Distance: Nearest to Furthest</option>
-          </select>
+      <div className="mx-4 sm:mx-6 lg:mx-20 my-4 flex flex-col lg:flex-row gap-5">
+        <div className="w-full lg:flex-1 min-w-0">
+          <RecommendedCards attractions={paginatedAttractions} />
         </div>
       </div>
 
-      <div className="mx-4 sm:mx-6 lg:mx-20 my-4 flex flex-col lg:flex-row gap-5">
-        <div className="w-full lg:flex-1 min-w-0">
-          <RecommendedCards attractions={filteredAttractions} />
+      {totalPages > 1 && (
+        <div className="mx-4 sm:mx-6 lg:mx-20 my-8 flex justify-center items-center gap-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="btn btn-outline"
+          >
+            Previous
+          </button>
+          <span className="text-gray-600">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+            }
+            disabled={currentPage === totalPages}
+            className="btn btn-outline"
+          >
+            Next
+          </button>
         </div>
-      </div>
+      )}
+
       <Footer />
     </div>
   );

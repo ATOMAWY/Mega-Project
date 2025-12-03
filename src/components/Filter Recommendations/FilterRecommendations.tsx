@@ -1,9 +1,10 @@
 import { CiFilter } from "react-icons/ci";
 
 type FilterState = {
-  budget: number;
+  selectedCostTiers: string[];
   selectedMoods: string[];
   selectedActivityTypes: string[];
+  selectedIndoorOutdoor: string[];
   minRating: number;
 };
 
@@ -11,29 +12,35 @@ type Props = {
   filters: FilterState;
   onChange: (next: FilterState) => void;
   onReset: () => void;
-  onApply?: () => void;
 };
 
+// Mood options matching /api/Places/vibe endpoint
 const moodOptions = [
-  "Adventurous",
-  "Relaxing",
-  "Cultural",
   "Romantic",
-  "Family-Friendly",
-  "Historical",
+  "Calm",
+  "Adventure",
+  "Photography",
+  "Foodie",
+  "Family",
 ];
 
+// Activity type options matching /api/Places/category endpoint
 const activityOptions = [
-  "Historical Sites",
-  "Museums",
+  "Attraction",
+  "Restaurant",
+  "Cafe",
   "Shopping",
-  "Food Tours",
-  "Outdoor Activities",
-  "Nightlife",
-  "Art & Culture",
+  "Museum",
+  "Park",
 ];
 
-const FilterRecommendations = ({ filters, onChange, onReset, onApply }: Props) => {
+// Cost tier options matching /api/Places/cost endpoint
+const costTierOptions = ["Low", "Medium", "High"];
+
+// Indoor/Outdoor options matching /api/Places/weather endpoint
+const indoorOutdoorOptions = ["Indoor", "Outdoor"];
+
+const FilterRecommendations = ({ filters, onChange, onReset }: Props) => {
   const toggleMood = (mood: string) => {
     const exists = filters.selectedMoods.includes(mood);
     const selectedMoods = exists
@@ -48,6 +55,22 @@ const FilterRecommendations = ({ filters, onChange, onReset, onApply }: Props) =
       ? filters.selectedActivityTypes.filter((a) => a !== activity)
       : [...filters.selectedActivityTypes, activity];
     onChange({ ...filters, selectedActivityTypes });
+  };
+
+  const toggleCostTier = (costTier: string) => {
+    const exists = filters.selectedCostTiers.includes(costTier);
+    const selectedCostTiers = exists
+      ? filters.selectedCostTiers.filter((c) => c !== costTier)
+      : [...filters.selectedCostTiers, costTier];
+    onChange({ ...filters, selectedCostTiers });
+  };
+
+  const toggleIndoorOutdoor = (option: string) => {
+    const exists = filters.selectedIndoorOutdoor.includes(option);
+    const selectedIndoorOutdoor = exists
+      ? filters.selectedIndoorOutdoor.filter((o) => o !== option)
+      : [...filters.selectedIndoorOutdoor, option];
+    onChange({ ...filters, selectedIndoorOutdoor });
   };
 
   return (
@@ -78,24 +101,22 @@ const FilterRecommendations = ({ filters, onChange, onReset, onApply }: Props) =
               </div>
             </div>
             <div className="my-5">
-              <h2 className="text-xl font-bold mb-3 ">Budget</h2>
-              <input
-                type="range"
-                min={0}
-                max={50000}
-                value={filters.budget}
-                onChange={(e) => {
-                  const budget = Math.round(Number(e.target.value) / 100) * 100;
-                  onChange({ ...filters, budget });
-                }}
-                className="range range-xs [--range-shdw:orange]"
-              />
-              <p className="text-gray-500">
-                Budget Level:{" "}
-                <span className="font-bold">
-                  {filters.budget.toLocaleString("en-US")} EGP
-                </span>
-              </p>
+              <h2 className="text-xl font-bold mb-3">Budget</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {costTierOptions.map((costTier) => (
+                  <button
+                    key={costTier}
+                    onClick={() => toggleCostTier(costTier)}
+                    className={`btn rounded-full text-md w-full justify-start ${
+                      filters.selectedCostTiers.includes(costTier)
+                        ? "bg-orange-400 text-white hover:bg-orange-500"
+                        : ""
+                    }`}
+                  >
+                    {costTier}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="flex flex-col md:flex-row md:gap-5 lg:flex-col lg:gap-0">
@@ -112,6 +133,24 @@ const FilterRecommendations = ({ filters, onChange, onReset, onApply }: Props) =
                     />
                     <span className="items-start">{activity}</span>
                   </label>
+                ))}
+              </div>
+            </div>
+            <div className="my-5">
+              <h2 className="text-xl font-bold mb-3">Indoor/Outdoor</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {indoorOutdoorOptions.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => toggleIndoorOutdoor(option)}
+                    className={`btn rounded-full text-md w-full justify-start ${
+                      filters.selectedIndoorOutdoor.includes(option)
+                        ? "bg-orange-400 text-white hover:bg-orange-500"
+                        : ""
+                    }`}
+                  >
+                    {option}
+                  </button>
                 ))}
               </div>
             </div>
@@ -139,13 +178,6 @@ const FilterRecommendations = ({ filters, onChange, onReset, onApply }: Props) =
         </div>
 
         <div className="flex flex-col gap-4 my-5">
-          <button
-            type="button"
-            className="btn bg-orange-400 align-middle justify-center text-white text-xl"
-            onClick={onApply}
-          >
-            Apply Filters
-          </button>
           <button
             type="button"
             className="btn bg-white align-middle justify-center text-black text-xl"

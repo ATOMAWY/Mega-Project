@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import FilterRecommendations from "./../components/Filter Recommendations/FilterRecommendations";
@@ -13,24 +13,29 @@ type SortOption =
   | "distance-asc";
 
 type FilterState = {
-  budget: number;
+  selectedCostTiers: string[];
   selectedMoods: string[];
   selectedActivityTypes: string[];
+  selectedIndoorOutdoor: string[];
   minRating: number;
 };
 
 const DEFAULT_FILTERS: FilterState = {
-  budget: 50000,
+  selectedCostTiers: [],
   selectedMoods: [],
   selectedActivityTypes: [],
+  selectedIndoorOutdoor: [],
   minRating: 1,
 };
+
+const ITEMS_PER_PAGE = 12;
 
 const Recommendations = () => {
   // In the future this can be replaced with data from an API / database.
   const [allAttractions] = useState(staticAttractions);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortOption, setSortOption] = useState<SortOption>("rating-desc");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredAttractions = useMemo(() => {
     let list = [...allAttractions];
@@ -40,22 +45,57 @@ const Recommendations = () => {
       const matchesRating =
         typeof item.rating === "number" && item.rating >= filters.minRating;
 
-      const matchesBudget =
-        typeof item.price === "number" ? item.price <= filters.budget : true;
+      // Filter by cost tier (matching /api/Places/cost endpoint)
+      // Check if any selected cost tier matches the item's level/costTier (case-insensitive)
+      const matchesCostTier =
+        !filters.selectedCostTiers.length ||
+        filters.selectedCostTiers.some((selectedTier: string) => {
+          // Check both level (normalized) and raw.costTier (from API)
+          const itemTier =
+            (item.level && item.level !== "Varies" ? item.level : null) ||
+            item.raw?.costTier ||
+            "";
+          return (
+            itemTier &&
+            itemTier.toLowerCase() === selectedTier.toLowerCase()
+          );
+        });
 
+      // Filter by moods (matching /api/Places/vibe endpoint)
+      // Check if any selected mood matches any mood in the item's moods array (case-insensitive)
       const matchesMoods =
         !filters.selectedMoods.length ||
         (Array.isArray(item.moods) &&
-          item.moods.some((m: string) => filters.selectedMoods.includes(m)));
-
-      const matchesActivityTypes =
-        !filters.selectedActivityTypes.length ||
-        (Array.isArray(item.activityTypes) &&
-          item.activityTypes.some((a: string) =>
-            filters.selectedActivityTypes.includes(a)
+          item.moods.some((m: string) =>
+            filters.selectedMoods.some(
+              (selectedMood: string) =>
+                m.toLowerCase() === selectedMood.toLowerCase()
+            )
           ));
 
-      return matchesRating && matchesBudget && matchesMoods && matchesActivityTypes;
+      // Filter by category (matching /api/Places/category endpoint)
+      const matchesActivityTypes =
+        !filters.selectedActivityTypes.length ||
+        (item.category &&
+          filters.selectedActivityTypes.some((selectedCategory: string) =>
+            item.category.toLowerCase() === selectedCategory.toLowerCase()
+          ));
+
+      // Filter by Indoor/Outdoor (matching /api/Places/weather endpoint)
+      const matchesIndoorOutdoor =
+        !filters.selectedIndoorOutdoor.length ||
+        (item.indoorOutdoor &&
+          filters.selectedIndoorOutdoor.some((selectedOption: string) =>
+            item.indoorOutdoor.toLowerCase() === selectedOption.toLowerCase()
+          ));
+
+      return (
+        matchesRating &&
+        matchesCostTier &&
+        matchesMoods &&
+        matchesActivityTypes &&
+        matchesIndoorOutdoor
+      );
     });
 
     // Apply sorting
@@ -78,6 +118,16 @@ const Recommendations = () => {
 
     return list;
   }, [allAttractions, filters, sortOption]);
+
+  // Reset to first page when filters or sort option changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, sortOption]);
+
+  const totalPages = Math.ceil(filteredAttractions.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedAttractions = filteredAttractions.slice(startIndex, endIndex);
 
   const handleResetFilters = () => {
     setFilters(DEFAULT_FILTERS);
@@ -123,11 +173,36 @@ const Recommendations = () => {
         </div>
         <div className="w-full lg:flex-1 min-w-0">
           <RecommendedCards
-            attractions={filteredAttractions}
+            attractions={paginatedAttractions}
             showCloseButton={true}
           />
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mx-4 sm:mx-6 lg:mx-20 my-8 flex justify-center items-center gap-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="btn btn-outline"
+          >
+            Previous
+          </button>
+          <span className="text-gray-600">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+            }
+            disabled={currentPage === totalPages}
+            className="btn btn-outline"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
