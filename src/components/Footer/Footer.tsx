@@ -7,6 +7,7 @@ const Footer = () => {
     { path: "/recommendations", label: "Recommendations" },
     { path: "/browse", label: "Browse" },
     { path: "/quiz", label: "Quiz" },
+    { path: "/trip-planner", label: "Trip Planner" },
     { path: "/favourites", label: "Favourites" },
   ];
 

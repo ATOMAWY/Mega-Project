@@ -23,8 +23,8 @@ const options = [
     title: "Smart Mini Trip Planner",
     desc: "Build your perfect itinerary day by day.",
     icon: <FaCalendarAlt />,
-    path: null,
-    isFunctional: false,
+    path: "/trip-planner",
+    isFunctional: true,
   },
   {
     title: "Settings",

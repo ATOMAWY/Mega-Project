@@ -98,30 +98,6 @@ const NavBar = () => {
             <li>
               <Link to="/favourites">Favourites</Link>
             </li>
-            <li>
-              <Link
-                to="/profile"
-                className={
-                  isActive("/profile")
-                    ? "text-gray-400 pointer-events-none"
-                    : ""
-                }
-              >
-                Profile
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/settings"
-                className={
-                  isActive("/settings")
-                    ? "text-gray-400 pointer-events-none"
-                    : ""
-                }
-              >
-                Settings
-              </Link>
-            </li>
           </ul>
         </div>
       </div>
