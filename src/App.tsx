@@ -16,6 +16,7 @@ import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ScrollToTop from "./components/Scroller/ScrollToTop";
+import TripPlanner from "./pages/TripPlanner";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/browse" element={<Browse />} />
         <Route path="/favourites" element={<Favourites />} />
         <Route path="/attraction/:id" element={<AttractionDetails />} />
+        <Route path="/trip-planner" element={<TripPlanner />} />
         <Route path="/help" element={<HelpCenter />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />

@@ -84,7 +84,16 @@ const NavBar = () => {
               </Link>
             </li>
             <li>
-              <a>Trip Planner</a>
+              <Link
+                to="/trip-planner"
+                className={
+                  isActive("/trip-planner")
+                    ? "text-gray-400 pointer-events-none"
+                    : ""
+                }
+              >
+                Trip Planner
+              </Link>
             </li>
             <li>
               <Link to="/favourites">Favourites</Link>
@@ -155,10 +164,15 @@ const NavBar = () => {
           <FaList />
           Recommendations
         </Link>
-        <a className="btn btn-ghost text-sm">
+        <Link
+          to="/trip-planner"
+          className={`btn btn-ghost text-sm ${
+            isActive("/trip-planner") ? "text-gray-400 pointer-events-none" : ""
+          }`}
+        >
           <FaCalendarAlt />
           Trip Planner
-        </a>
+        </Link>
         <Link to="/favourites" className="btn btn-ghost text-sm">
           <FaRegHeart />
           Favourites
