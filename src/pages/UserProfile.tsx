@@ -3,29 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaCog, FaBars, FaHome } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import { getCurrentUser, logout } from "../services/authService";
-import type { User } from "../types/auth";
+import { useSelector } from "react-redux";
+import { selectCurrentToken, selectCurrentUser } from "../features/auth/slice";
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const [_, setCurrentUser] = useState<User | null>(null);
-  const [userInfo, setUserInfo] = useState({
-    fullName: "",
-    email: "",
-    phoneNumber: "",
-    address: "",
-  });
+  const user = useSelector(selectCurrentUser);
+  const token = useSelector(selectCurrentToken);
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-      setUserInfo({
-        fullName: user.fullName || "",
-        email: user.email || "",
-        phoneNumber: user.phoneNumber || "",
-        address: user.address || "",
-      });
-    }
+    console.log(user);
   }, []);
 
   const [preferences, setPreferences] = useState({
@@ -34,6 +21,12 @@ const UserProfile = () => {
     travelReminders: true,
   });
 
+  const [userInfo, setUserInfo] = useState({
+    fullName: user?.fullName || "John Doe",
+    email: user?.email || "",
+    phoneNumber: user?.phoneNumber || "123-456-7890",
+    address: user?.address || "123 Main St, Anytown, USA",
+  });
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

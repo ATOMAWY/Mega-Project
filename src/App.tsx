@@ -16,6 +16,8 @@ import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ScrollToTop from "./components/Scroller/ScrollToTop";
+import Welcome from "./components/Auth/Welcome";
+import RequireAuth from "./components/Auth/requireAuth";
 
 function App() {
   return (
@@ -25,8 +27,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<UserProfile />} />
-        <Route path="/settings" element={<Settings />} />
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/quiz/results" element={<QuizResults />} />
@@ -38,6 +38,14 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="*" element={<PageNotFound />} />
+
+        {/* protected routes */}
+        <Route element={<RequireAuth />}>
+          {" "}
+          <Route path="/test" element={<Welcome />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
       </Routes>
     </Router>
   );
