@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FaUser, FaCog, FaBars, FaHome } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentToken, selectCurrentUser, setUser, logOut } from "../features/auth/slice";
 
 const UserProfile = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector(selectCurrentUser);
   const token = useSelector(selectCurrentToken);

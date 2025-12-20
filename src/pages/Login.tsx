@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, use } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../features/auth/slice";
@@ -8,11 +8,10 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 const Login = () => {
   const navigate = useNavigate();
   const userRef = useRef<HTMLInputElement>(null);
-  const errRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errMsg, setErrMsg] = useState("");
+  const [_, setErrMsg] = useState("");
 
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
