@@ -25,9 +25,6 @@ const AttractionDetails = () => {
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Find the attraction by id
-  const attractionId = id ? parseInt(id) : null;
-
   useEffect(() => {
     fetchAttractions().then((data) => {
       setAttractions(data);
@@ -35,18 +32,27 @@ const AttractionDetails = () => {
     });
   }, []);
 
+  // Find the attraction by either numeric id or UUID placeId
+  const attraction = attractions.find((attr) => {
+    const numericId = id ? parseInt(id) : null;
+    return (
+      (numericId !== null && !isNaN(numericId) && attr.id === numericId) || 
+      attr.placeId === id
+    );
+  }) || null;
+
   // Initialize favorite state from localStorage
   useEffect(() => {
-    if (attractionId !== null) {
-      setIsFavoriteState(isFavorite(attractionId));
+    if (attraction?.id) {
+      setIsFavoriteState(isFavorite(attraction.id));
     }
-  }, [attractionId]);
+  }, [attraction?.id]);
 
   // Listen for favorite updates
   useEffect(() => {
     const handleFavoritesUpdated = () => {
-      if (attractionId !== null) {
-        setIsFavoriteState(isFavorite(attractionId));
+      if (attraction?.id) {
+        setIsFavoriteState(isFavorite(attraction.id));
       }
     };
 
@@ -57,11 +63,7 @@ const AttractionDetails = () => {
       window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
       window.removeEventListener("storage", handleFavoritesUpdated);
     };
-  }, [attractionId]);
-
-  // Find the attraction by id (after all hooks)
-  const attraction =
-    attractions.find((attr) => attr.id === attractionId) || null;
+  }, [attraction?.id]);
 
   // Show loading state
   if (loading) {
@@ -98,15 +100,15 @@ const AttractionDetails = () => {
   }
 
   const toggleFavorite = () => {
-    if (attractionId !== null) {
-      const newState = toggleFavoriteService(attractionId);
+    if (attraction?.id) {
+      const newState = toggleFavoriteService(attraction.id);
       setIsFavoriteState(newState);
     }
   };
 
   // Get other attractions (excluding current one) for trending and hidden gems
   const otherAttractions = attractions.filter(
-    (attr) => attr.id !== attractionId
+    (attr) => attr.id !== attraction?.id
   );
 
   const roundedRating = Math.max(

@@ -3,7 +3,7 @@ import AdvancedCard from "./../Reusable Components/AdvancedCard";
 type Props = {
   attractions: any[];
   showCloseButton?: boolean;
-  onRemoveFavorite?: (placeId: number) => void;
+  onRemoveFavorite?: (placeId: string) => void;
   onEditCategory?: (placeId: number, currentCategory?: string) => void;
   editingCategory?: number | null;
   newCategory?: string;
@@ -38,13 +38,14 @@ const RecommendedCards = ({
             isFavorite={attraction.isFavorite}
             category={attraction.category}
             id={attraction.id}
+            placeId={attraction.placeId}
             showCloseButton={showCloseButton}
             userCategory={attraction.favoriteData?.userCategory}
             isEditingCategory={editingCategory === attraction.id}
             newCategory={newCategory || ""}
             onRemoveFavorite={
-              onRemoveFavorite
-                ? () => onRemoveFavorite(attraction.id)
+              onRemoveFavorite && attraction.placeId
+                ? () => onRemoveFavorite(attraction.placeId)
                 : undefined
             }
             onEditCategory={
@@ -63,7 +64,7 @@ const RecommendedCards = ({
                 : undefined
             }
             onCategoryCancel={onCategoryCancel}
-            key={attraction.id || idx}
+            key={attraction.placeId || attraction.id || idx}
           />
         ))}
       </div>

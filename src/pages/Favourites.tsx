@@ -1,14 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useSelector } from "react-redux";
 import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import RecommendedCards from "../components/Recommended Cards/RecommendedCards";
-import { fetchAttractions, type Attraction } from "../data/attractions";
+import { type Attraction } from "../data/attractions";
 import {
-  getFavorites,
-  removeFavorite,
-  updateFavoriteCategory,
-} from "../services/favoritesService";
-import type { LocalFavorite } from "../types/favorite";
+  useGetUserFavoritesQuery,
+} from "../features/favorites/favoritesApiSlice";
+import { selectCurrentUser } from "../features/auth/slice";
 import { FaHeart, FaFilter } from "react-icons/fa";
 import { Link } from "react-router";
 
@@ -16,61 +15,52 @@ type SortOption = "newest" | "oldest" | "rating" | "name";
 type FilterOption = "all" | string; // "all" or category name
 
 const Favourites = () => {
-  const [favorites, setFavorites] = useState<LocalFavorite[]>([]);
-  const [attractions, setAttractions] = useState<Attraction[]>([]);
+  const user = useSelector(selectCurrentUser);
   const [selectedCategory, setSelectedCategory] = useState<FilterOption>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [editingCategory, setEditingCategory] = useState<number | null>(null);
   const [newCategory, setNewCategory] = useState("");
 
-  // Load attractions
-  useEffect(() => {
-    fetchAttractions().then(setAttractions);
-  }, []);
+  // Fetch favorites from API
+  const {
+    data: favoritesData = [],
+    isLoading,
+    isError,
+    error,
+  } = useGetUserFavoritesQuery(user?.id || "", {
+    skip: !user?.id, // Skip if no user logged in
+  });
 
-  // Load favorites and listen for updates
-  useEffect(() => {
-    const loadFavorites = () => {
-      const favs = getFavorites();
-      setFavorites(favs);
-    };
-
-    loadFavorites();
-
-    // Listen for storage changes (cross-tab)
-    const handleStorageChange = () => {
-      loadFavorites();
-    };
-
-    // Listen for custom event (same-tab)
-    const handleFavoritesUpdated = () => {
-      loadFavorites();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
-    };
-  }, []);
-
-  // Get favorite attractions with their data
+  // Transform API favorites to Attraction format
   const favoriteAttractions = useMemo(() => {
-    const favoriteIds = favorites.map((fav) => fav.placeId);
-    return attractions
-      .filter((attraction) => favoriteIds.includes(attraction.id))
-      .map((attraction) => {
-        const favorite = favorites.find((fav) => fav.placeId === attraction.id);
-        return {
-          ...attraction,
+    return favoritesData
+      .filter((fav) => fav.place) // Only include favorites with place data
+      .map((fav) => {
+        const place = fav.place;
+        const attraction: Attraction = {
+          id: 0, // Not used when we have placeId
+          placeId: place.placeId,
+          title: place.name || "Unknown Place",
+          description: place.description || "",
+          fullDescription: place.description || "",
+          photo: place.imageUrl,
+          rating: place.rating || 0,
+          category: place.category || "Uncategorized",
+          level: place.priceRange || "Varies",
+          distance: place.address || "Cairo",
+          district: place.address,
           isFavorite: true,
-          favoriteData: favorite,
+          favoriteData: {
+            placeId: 0, // legacy field
+            userCategory: fav.userCategory || undefined,
+            createdAt: fav.createdAt,
+          },
+          raw: place as any,
         };
+        return attraction;
       });
-  }, [favorites, attractions]);
+  }, [favoritesData]);
 
   // Get unique categories from attractions
   const availableCategories = useMemo(() => {
@@ -119,18 +109,9 @@ const Favourites = () => {
     return sorted;
   }, [favoriteAttractions, selectedCategory, sortBy]);
 
-  // Handle remove favorite
-  const handleRemoveFavorite = (placeId: number) => {
-    if (
-      window.confirm("Are you sure you want to remove this from favorites?")
-    ) {
-      removeFavorite(placeId);
-    }
-  };
-
-  // Handle category update
+  // Handle category update (not implemented in backend yet)
   const handleCategoryUpdate = (placeId: number, category: string) => {
-    updateFavoriteCategory(placeId, category);
+    // TODO: Backend doesn't have update category endpoint yet
     setEditingCategory(null);
     setNewCategory("");
   };
@@ -140,6 +121,71 @@ const Favourites = () => {
     setEditingCategory(placeId);
     setNewCategory(currentCategory || "");
   };
+
+  // Show login prompt if not logged in
+  if (!user) {
+    return (
+      <div className="overflow-x-hidden min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center p-8">
+            <FaHeart className="text-gray-300 text-6xl mb-4 mx-auto" />
+            <h2 className="text-2xl font-bold text-gray-600 mb-4">Please Log In</h2>
+            <p className="text-gray-500 mb-6">
+              You need to be logged in to view your favorites.
+            </p>
+            <Link
+              to="/login"
+              className="btn bg-orange-400 text-white hover:bg-orange-500"
+            >
+              Go to Login
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="overflow-x-hidden min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="loading loading-spinner loading-lg text-orange-400"></div>
+            <p className="mt-4 text-gray-600">Loading your favorites...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <div className="overflow-x-hidden min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center p-8">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+            <p className="text-gray-500 mb-6">
+              Failed to load favorites: {(error as any)?.message || "Unknown error"}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="btn bg-orange-400 text-white hover:bg-orange-500"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-hidden min-h-screen flex flex-col">
@@ -275,8 +321,6 @@ const Favourites = () => {
             <div className="my-4">
               <RecommendedCards
                 attractions={filteredAndSortedFavorites}
-                showCloseButton={true}
-                onRemoveFavorite={handleRemoveFavorite}
                 onEditCategory={handleCategoryEdit}
                 editingCategory={editingCategory}
                 newCategory={newCategory}

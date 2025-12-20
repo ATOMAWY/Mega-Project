@@ -5,8 +5,14 @@ import { FaRegHeart } from "react-icons/fa";
 import { FaRegWindowClose } from "react-icons/fa";
 import { MdCategory, MdEdit, MdCheck, MdClose } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { toggleFavorite, isFavorite } from "../../services/favoritesService";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../features/auth/slice";
+import {
+  useAddFavoriteMutation,
+  useRemoveFavoriteMutation,
+  useGetUserFavoritesQuery,
+} from "../../features/favorites/favoritesApiSlice";
 
 type Props = {
   photo: string;
@@ -19,6 +25,7 @@ type Props = {
   isFavorite: boolean;
   category: string;
   id?: number;
+  placeId?: string; // UUID from backend
   showCloseButton?: boolean;
   userCategory?: string;
   isEditingCategory?: boolean;
@@ -41,6 +48,7 @@ const AdvancedCard = ({
   isFavorite: initialIsFavorite,
   category,
   id,
+  placeId,
   showCloseButton = false,
   userCategory,
   isEditingCategory = false,
@@ -51,44 +59,57 @@ const AdvancedCard = ({
   onCategorySave,
   onCategoryCancel,
 }: Props) => {
-  const [favoriteState, setFavoriteState] = useState(initialIsFavorite);
   const [hasImageError, setHasImageError] = useState(false);
+  const user = useSelector(selectCurrentUser);
 
-  // Sync favorite state with localStorage
-  useEffect(() => {
-    if (id !== undefined) {
-      setFavoriteState(isFavorite(id));
-    }
-  }, [id]);
+  // API mutations
+  const [addFavorite, { isLoading: isAdding }] = useAddFavoriteMutation();
+  const [removeFavorite, { isLoading: isRemoving }] = useRemoveFavoriteMutation();
 
-  // Listen for favorite updates
-  useEffect(() => {
-    const handleFavoritesUpdated = () => {
-      if (id !== undefined) {
-        setFavoriteState(isFavorite(id));
-      }
-    };
+  // Get user's favorites list
+  const { data: userFavorites = [] } = useGetUserFavoritesQuery(user?.id || "", {
+    skip: !user?.id,
+  });
 
-    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-    window.addEventListener("storage", handleFavoritesUpdated);
-
-    return () => {
-      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
-      window.removeEventListener("storage", handleFavoritesUpdated);
-    };
-  }, [id]);
+  // Check if this place is in the user's favorites
+  const isFavoritedFromAPI = userFavorites.some(fav => fav.placeId === placeId);
+  const favoriteState = placeId && user?.id ? isFavoritedFromAPI : initialIsFavorite;
+  const isLoadingFavorite = isAdding || isRemoving;
 
   const roundedRating = Math.max(0, Math.min(5, Math.round(rating ?? 0)));
   const stars = Array.from({ length: 5 }, (_, i) =>
     i < roundedRating ? "★" : "☆"
   ).join("");
 
-  const handleFavoriteToggle = (e: React.MouseEvent) => {
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (id !== undefined) {
-      const newState = toggleFavorite(id);
-      setFavoriteState(newState);
+
+    if (!user?.id) {
+      alert("Please log in to add favorites");
+      return;
+    }
+
+    if (!placeId) {
+      return;
+    }
+
+    try {
+      if (favoriteState) {
+        // Remove from favorites
+        await removeFavorite({ userId: user.id, placeId }).unwrap();
+      } else {
+        // Add to favorites
+        await addFavorite({ userId: user.id, placeId }).unwrap();
+      }
+    } catch (err: any) {
+      // Handle "already exists" error silently (backend quirk)
+      const errorMessage = err?.data || err?.message || "";
+      if (errorMessage && typeof errorMessage === "string" && errorMessage.includes("Already exists")) {
+        return; // Already favorited, that's fine
+      }
+      console.error("Failed to toggle favorite:", err);
+      alert("Failed to update favorites. Please try again.");
     }
   };
 
@@ -258,10 +279,13 @@ const AdvancedCard = ({
           )}
           <button
             onClick={handleFavoriteToggle}
-            className="text-2xl transition-colors"
+            className="text-2xl transition-colors disabled:opacity-50"
             title={favoriteState ? "Remove from favorites" : "Add to favorites"}
+            disabled={isLoadingFavorite}
           >
-            {favoriteState ? (
+            {isLoadingFavorite ? (
+              <span className="loading loading-spinner loading-sm"></span>
+            ) : favoriteState ? (
               <FaHeart className="text-orange-400" />
             ) : (
               <FaRegHeart className="text-gray-600" />
@@ -269,9 +293,9 @@ const AdvancedCard = ({
           </button>
         </div>
 
-        {id !== undefined ? (
+        {(placeId || id !== undefined) ? (
           <Link
-            to={`/attraction/${id}`}
+            to={`/attraction/${placeId || id}`}
             className="btn bg-orange-400 align-middle justify-center text-white hover:bg-orange-500"
           >
             View Details
