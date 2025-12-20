@@ -19,7 +19,7 @@ export interface RegisterData {
   email: string;
   password: string;
   fullName: string;
-  phoneNumber?: string;
+  age?: number;
   address?: string;
 }
 

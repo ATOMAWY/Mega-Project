@@ -2,31 +2,22 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaCog, FaBars, FaHome } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
-import { getCurrentUser, logout } from "../services/authService";
-import type { User } from "../types/auth";
+import { useSelector, useDispatch } from "react-redux";
+import { selectCurrentToken, selectCurrentUser, setUser, logOut } from "../features/auth/slice";
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const [_, setCurrentUser] = useState<User | null>(null);
+  const dispatch = useDispatch();
+  const user = useSelector(selectCurrentUser);
+  const token = useSelector(selectCurrentToken);
   const [userInfo, setUserInfo] = useState({
-    fullName: "",
-    email: "",
-    phoneNumber: "",
-    address: "",
-  });
-
-  useEffect(() => {
-    const user = getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-      setUserInfo({
-        fullName: user.fullName || "",
-        email: user.email || "",
-        phoneNumber: user.phoneNumber || "",
-        address: user.address || "",
-      });
-    }
-  }, []);
+            id: user?.id || "",
+            fullName: user?.fullName || "...",
+            email: user?.email || "...",
+            address: user?.address || "...",
+            age: user?.age || 0,
+            joinDate: user?.joinDate || "",
+        });
 
   const [preferences, setPreferences] = useState({
     emailNotifications: true,
@@ -34,6 +25,53 @@ const UserProfile = () => {
     travelReminders: true,
   });
 
+
+    useEffect(() => {
+    const fetchUserData = async () => {
+
+      try {
+        const response = await fetch(
+          "https://cairogo.runasp.net/api/Auth/me",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (data.data) {
+          const userData = {
+            id: data.data.id,
+            email: data.data.email,
+            fullName: data.data.fullName,
+            address: data.data.address,
+            age: data.data.age,
+            joinDate: data.data.joinDate,
+          };
+          const updatedUserInfo = {
+            id: data.data.id,
+            fullName: data.data.fullName,
+            email: data.data.email,
+            address: data.data.address,
+            age: data.data.age,
+            joinDate: data.data.joinDate,
+          };
+          setUserInfo(updatedUserInfo);
+          dispatch(setUser(userData));
+          console.log(updatedUserInfo);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -53,10 +91,11 @@ const UserProfile = () => {
     setPreferences({ ...preferences, [field]: !preferences[field] });
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-    window.location.reload();
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    dispatch(logOut());
   };
 
   return (
@@ -264,46 +303,6 @@ const UserProfile = () => {
                       </div>
                     </div>
 
-                    {/* Phone Number */}
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
-                      <span className="text-sm text-gray-600 sm:w-32">
-                        Phone Number
-                      </span>
-                      <div className="flex items-center gap-4 flex-1">
-                        {isEditing === "phoneNumber" ? (
-                          <>
-                            <input
-                              type="tel"
-                              value={tempValue}
-                              onChange={(e) => setTempValue(e.target.value)}
-                              className="input input-sm input-bordered flex-1"
-                              autoFocus
-                            />
-                            <button
-                              onClick={() => handleSave("phoneNumber")}
-                              className="text-sm text-orange-500 hover:underline whitespace-nowrap"
-                            >
-                              Save
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-sm text-gray-900 flex-1">
-                              {userInfo.phoneNumber}
-                            </span>
-                            <button
-                              onClick={() =>
-                                handleEdit("phoneNumber", userInfo.phoneNumber)
-                              }
-                              className="text-sm text-orange-500 hover:underline whitespace-nowrap"
-                            >
-                              Edit
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
                     {/* Address */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
                       <span className="text-sm text-gray-600 sm:w-32">
@@ -334,6 +333,86 @@ const UserProfile = () => {
                             <button
                               onClick={() =>
                                 handleEdit("address", userInfo.address)
+                              }
+                              className="text-sm text-orange-500 hover:underline whitespace-nowrap"
+                            >
+                              Edit
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Age */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
+                      <span className="text-sm text-gray-600 sm:w-32">
+                        Age
+                      </span>
+                      <div className="flex items-center gap-4 flex-1">
+                        {isEditing === "age" ? (
+                          <>
+                            <input
+                              type="number"
+                              value={tempValue}
+                              onChange={(e) => setTempValue(e.target.value)}
+                              className="input input-sm input-bordered flex-1"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => handleSave("age")}
+                              className="text-sm text-orange-500 hover:underline whitespace-nowrap"
+                            >
+                              Save
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-sm text-gray-900 flex-1">
+                              {userInfo.age}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleEdit("age", String(userInfo.age))
+                              }
+                              className="text-sm text-orange-500 hover:underline whitespace-nowrap"
+                            >
+                              Edit
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Join Date */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 gap-2">
+                      <span className="text-sm text-gray-600 sm:w-32">
+                        Join Date
+                      </span>
+                      <div className="flex items-center gap-4 flex-1">
+                        {isEditing === "joinDate" ? (
+                          <>
+                            <input
+                              type="text"
+                              value={tempValue}
+                              onChange={(e) => setTempValue(e.target.value)}
+                              className="input input-sm input-bordered flex-1"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => handleSave("joinDate")}
+                              className="text-sm text-orange-500 hover:underline whitespace-nowrap"
+                            >
+                              Save
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-sm text-gray-900 flex-1">
+                              {userInfo.joinDate ? new Date(userInfo.joinDate).toLocaleDateString() : "..."}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleEdit("joinDate", userInfo.joinDate)
                               }
                               className="text-sm text-orange-500 hover:underline whitespace-nowrap"
                             >
@@ -386,19 +465,6 @@ const UserProfile = () => {
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Account Details */}
-                <div className="mb-6">
-                  <h3 className="text-sm sm:text-base font-semibold mb-4">
-                    Account Details
-                  </h3>
-                  <button className="text-sm text-orange-500 hover:underline mb-3 block">
-                    Change Password
-                  </button>
-                  <button className="w-full py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg">
-                    Delete Account
-                  </button>
                 </div>
 
                 {/* Footer */}
