@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaCog, FaBars, FaHome } from "react-icons/fa";
+import { FaUser, FaBars, FaHome } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentToken, selectCurrentUser, setUser, logOut } from "../features/auth/slice";
@@ -17,12 +17,6 @@ const UserProfile = () => {
             age: user?.age || 0,
             joinDate: user?.joinDate || "",
         });
-
-  const [preferences, setPreferences] = useState({
-    emailNotifications: true,
-    darkMode: false,
-    travelReminders: true,
-  });
 
 
     useEffect(() => {
