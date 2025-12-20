@@ -1,73 +1,64 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../services/authService";
-import type { LoginCredentials } from "../types/auth";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../features/auth/slice";
+import { useLoginMutation } from "../features/auth/authApiSlice";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState<LoginCredentials>({
-    email: "",
-    password: "",
-  });
+  const userRef = useRef<HTMLInputElement>(null);
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [_, setErrMsg] = useState("");
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch();
 
-    if (!credentials.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
+  useEffect(() => {
+    userRef.current?.focus();
+  }, []);
 
-    if (!credentials.password) {
-      newErrors.password = "Password is required";
-    }
-
-    setFieldErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  useEffect(() => {
+    setErrMsg("");
+  }, [user, password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setFieldErrors({});
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
-      const response = await login(credentials);
+      // 1. Login → get access & refresh tokens
+      const loginData = await login({ email: user, password }).unwrap();
 
-      if (response.success && response.user) {
-        // Redirect to home page after successful login
-        navigate("/");
-        // Optionally reload to update auth state across the app
-        window.location.reload();
-      } else {
-        setError(response.message || "Login failed. Please try again.");
-      }
+      // Backend returns the token under loginData.data.token
+      const accessToken = loginData.data.user.accessToken;
+
+      // If no refresh token is provided, set it to null or skip it
+      const refreshToken = loginData.data.user.refreshToken;
+
+      // Backend also includes user inside loginData.data.user
+      const userInfo = loginData.data.user;
+
+      // 2. Save tokens to localStorage immediately
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", JSON.stringify(userInfo));
+
+      // 4. Save user to localStorage
+
+      // 5. Save everything to Redux
+      dispatch(
+        setCredentials({
+          accessToken,
+          refreshToken,
+          user: userInfo,
+        })
+      );
+
+      navigate("/");
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
-      console.error("Login error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCredentials((prev) => ({ ...prev, [name]: value }));
-
-    if (fieldErrors[name]) {
-      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+      console.log(err);
     }
   };
 
@@ -87,26 +78,6 @@ const Login = () => {
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
-            {/* Error Message */}
-            {error && (
-              <div className="alert alert-error">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-current shrink-0 h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span className="text-sm">{error}</span>
-              </div>
-            )}
-
             {/* Email Field */}
             <div className="form-control">
               <label className="label">
@@ -121,22 +92,13 @@ const Login = () => {
                 <input
                   type="email"
                   name="email"
-                  value={credentials.email}
-                  onChange={handleChange}
+                  value={user}
+                  onChange={(e) => setUser(e.target.value)}
                   placeholder="your.email@example.com"
-                  className={`input input-bordered w-full pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
-                    fieldErrors.email ? "input-error" : ""
-                  }`}
+                  className={`input input-bordered w-full pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400`}
                   required
                 />
               </div>
-              {fieldErrors.email && (
-                <label className="label">
-                  <span className="label-text-alt text-error text-xs">
-                    {fieldErrors.email}
-                  </span>
-                </label>
-              )}
             </div>
 
             {/* Password Field */}
@@ -153,12 +115,10 @@ const Login = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  value={credentials.password}
-                  onChange={handleChange}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className={`input input-bordered w-full pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
-                    fieldErrors.password ? "input-error" : ""
-                  }`}
+                  className={`input input-bordered w-full pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400`}
                   required
                 />
                 <button
@@ -169,13 +129,6 @@ const Login = () => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              {fieldErrors.password && (
-                <label className="label">
-                  <span className="label-text-alt text-error text-xs">
-                    {fieldErrors.password}
-                  </span>
-                </label>
-              )}
             </div>
 
             {/* Remember Me & Forgot Password */}
@@ -187,12 +140,6 @@ const Login = () => {
                 />
                 <span className="label-text text-gray-600">Remember me</span>
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-orange-500 hover:text-orange-600 hover:underline"
-              >
-                Forgot password?
-              </Link>
             </div>
 
             {/* Submit Button */}

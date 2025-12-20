@@ -8,7 +8,6 @@ import {
   FaEye,
   FaEyeSlash,
   FaUser,
-  FaPhone,
 } from "react-icons/fa";
 
 const Register = () => {
@@ -17,7 +16,7 @@ const Register = () => {
     email: "",
     password: "",
     fullName: "",
-    phoneNumber: "",
+    age: undefined,
     address: "",
   });
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -68,7 +67,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const response = await register(formData);
+      const response = await register({ ...formData, confirmPassword });
 
       if (response.success && response.user) {
         // Redirect to home page after successful registration
@@ -195,27 +194,27 @@ const Register = () => {
               )}
             </div>
 
-            {/* Phone Number Field (Optional) */}
+            {/* Age Field (Optional) */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium text-gray-700">
-                  Phone Number{" "}
+                  Age{" "}
                   <span className="text-gray-400 text-xs">(Optional)</span>
                 </span>
               </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  <FaPhone />
-                </span>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="+20 123 456 7890"
-                  className="input input-bordered w-full pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-              </div>
+              <input
+                type="number"
+                name="age"
+                value={formData.age || ""}
+                onChange={(e) => {
+                  const value = e.target.value === "" ? undefined : parseInt(e.target.value, 10);
+                  setFormData((prev) => ({ ...prev, age: value }));
+                }}
+                placeholder="Enter your age"
+                min="1"
+                max="120"
+                className="input input-bordered w-full py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
             </div>
 
             {/* Address Field (Optional) */}

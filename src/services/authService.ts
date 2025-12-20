@@ -10,8 +10,6 @@ import type {
   AuthState,
 } from "../types/auth";
 
-const AUTH_TOKEN_KEY = "auth_token";
-const USER_DATA_KEY = "user_data";
 const AUTH_STATE_KEY = "auth_state";
 
 // API endpoints (to be configured when backend is ready)
@@ -78,10 +76,6 @@ export const login = async (
     // Generate demo token
     const token = `demo_token_${Date.now()}`;
 
-    // Store auth data
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
-    localStorage.setItem(USER_DATA_KEY, JSON.stringify(foundUser.user));
-
     const authState: AuthState = {
       isAuthenticated: true,
       user: foundUser.user,
@@ -98,170 +92,37 @@ export const login = async (
 
 /**
  * Register new user
- * Currently uses localStorage, but ready for API integration
  */
-export const register = async (data: RegisterData): Promise<AuthResponse> => {
-  // TODO: Replace with actual API call when backend is ready
-  // Example:
-  // try {
-  //   const response = await fetch(REGISTER_ENDPOINT, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify(data),
-  //   });
-  //
-  //   if (!response.ok) {
-  //     const error = await response.json();
-  //     return { success: false, message: error.message || "Registration failed" };
-  //   }
-  //
-  //   const data = await response.json();
-  //   const { user, token } = data;
-  //
-  //   // Store auth data
-  //   localStorage.setItem(AUTH_TOKEN_KEY, token);
-  //   localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
-  //
-  //   return { success: true, user, token };
-  // } catch (error) {
-  //   console.error("Registration error:", error);
-  //   return { success: false, message: "Network error. Please try again." };
-  // }
-
-  // Demo implementation using localStorage
+export const register = async (data: RegisterData & { confirmPassword?: string }): Promise<AuthResponse> => {
+  const API_URL = import.meta.env.VITE_API || "https://cairogo.runasp.net";
+  
   try {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Check if user already exists
-    const storedUsers = localStorage.getItem("demo_users");
-    const users: Array<{ email: string; password: string; user: User }> =
-      storedUsers ? JSON.parse(storedUsers) : [];
-
-    if (users.some((u) => u.email === data.email)) {
-      return { success: false, message: "Email already registered" };
-    }
-
-    // Create new user
-    const newUser: User = {
-      id: `user_${Date.now()}`,
-      email: data.email,
-      fullName: data.fullName,
-      phoneNumber: data.phoneNumber,
-      address: data.address,
-      createdAt: new Date(),
-    };
-
-    // Store user (in real app, password would be hashed on backend)
-    users.push({
-      email: data.email,
-      password: data.password, // In production, never store plain passwords
-      user: newUser,
+    const response = await fetch(`${API_URL}/api/Auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fullName: data.fullName,
+        email: data.email,
+        age: data.age,
+        address: data.address,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      }),
     });
-    localStorage.setItem("demo_users", JSON.stringify(users));
 
-    // Generate demo token
-    const token = `demo_token_${Date.now()}`;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { success: false, message: errorData.message || "Registration failed" };
+    }
+    
+    // The API response structure may vary, adjust based on actual response
+    // Assuming the response contains user data and token
 
-    // Store auth data
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
-    localStorage.setItem(USER_DATA_KEY, JSON.stringify(newUser));
-
-    const authState: AuthState = {
-      isAuthenticated: true,
-      user: newUser,
-      token,
-    };
-    localStorage.setItem(AUTH_STATE_KEY, JSON.stringify(authState));
-
-    return { success: true, user: newUser, token };
+    return { success: false, message: "Invalid response from server" };
   } catch (error) {
     console.error("Registration error:", error);
-    return { success: false, message: "An error occurred during registration" };
+    return { success: false, message: "Network error. Please try again." };
   }
-};
-
-/**
- * Logout user
- */
-export const logout = async (): Promise<void> => {
-  // TODO: Call logout endpoint when backend is ready
-  // Example:
-  // try {
-  //   await fetch(LOGOUT_ENDPOINT, {
-  //     method: "POST",
-  //     headers: {
-  //       "Authorization": `Bearer ${getToken()}`,
-  //     },
-  //   });
-  // } catch (error) {
-  //   console.error("Logout error:", error);
-  // }
-
-  // Clear local storage
-  localStorage.removeItem(AUTH_TOKEN_KEY);
-  localStorage.removeItem(USER_DATA_KEY);
-  localStorage.removeItem(AUTH_STATE_KEY);
-};
-
-/**
- * Get current authentication token
- */
-export const getToken = (): string | null => {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(AUTH_TOKEN_KEY);
-};
-
-/**
- * Get current user data
- */
-export const getCurrentUser = (): User | null => {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const userData = localStorage.getItem(USER_DATA_KEY);
-    if (!userData) return null;
-    return JSON.parse(userData);
-  } catch (error) {
-    console.error("Error reading user data:", error);
-    return null;
-  }
-};
-
-/**
- * Check if user is authenticated
- */
-export const isAuthenticated = (): boolean => {
-  const token = getToken();
-  const user = getCurrentUser();
-  return !!(token && user);
-};
-
-/**
- * Get authentication state
- */
-export const getAuthState = (): AuthState => {
-  if (typeof window === "undefined") {
-    return { isAuthenticated: false, user: null, token: null };
-  }
-
-  try {
-    const state = localStorage.getItem(AUTH_STATE_KEY);
-    if (state) {
-      return JSON.parse(state);
-    }
-  } catch (error) {
-    console.error("Error reading auth state:", error);
-  }
-
-  // Fallback: check token and user
-  const token = getToken();
-  const user = getCurrentUser();
-  return {
-    isAuthenticated: !!(token && user),
-    user,
-    token,
-  };
 };

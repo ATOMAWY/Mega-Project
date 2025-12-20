@@ -1,14 +1,27 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { FaHome } from "react-icons/fa";
 import { FaLightbulb } from "react-icons/fa";
 import { FaList } from "react-icons/fa6";
 import { FaCalendarAlt } from "react-icons/fa";
 import { FaMap } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa";
+import { logOut, selectCurrentToken } from "../../features/auth/slice";
 
 const NavBar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const currentPath = location.pathname;
+  const accessToken = useSelector(selectCurrentToken);
+  const hasAccessToken = Boolean(accessToken || localStorage.getItem("accessToken"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    dispatch(logOut());
+  };
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -157,36 +170,44 @@ const NavBar = () => {
 
       {/* beginning of profile section */}
       <div className="flex gap-2  w-full lg:w-auto  justify-end">
-        <div className="dropdown dropdown-end">
-          <div
-            tabIndex={0}
-            role="button"
-            className="btn btn-ghost btn-circle avatar"
-          >
-            <div className="w-10 rounded-full">
-              <img
-                alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-              />
+        {hasAccessToken ? (
+          <div className="dropdown dropdown-end">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-ghost btn-circle avatar"
+            >
+              <div className="w-10 rounded-full">
+                <img
+                  alt="Tailwind CSS Navbar component"
+                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                />
+              </div>
             </div>
+            <ul
+              tabIndex={-1}
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+            >
+              <li>
+                <Link to="/profile" className="justify-between">
+                  Profile
+                </Link>
+              </li>
+              <li>
+                <Link to="/settings">Settings</Link>
+              </li>
+              <li>
+                <button type="button" onClick={handleLogout}>
+                  Logout
+                </button>
+              </li>
+            </ul>
           </div>
-          <ul
-            tabIndex={-1}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-          >
-            <li>
-              <Link to="/profile" className="justify-between">
-                Profile
-              </Link>
-            </li>
-            <li>
-              <Link to="/settings">Settings</Link>
-            </li>
-            <li>
-              <a>Logout</a>
-            </li>
-          </ul>
-        </div>
+        ) : (
+          <Link to="/login" className="btn bg-orange-400 ">
+            Login
+          </Link>
+        )}
       </div>
     </div>
   );

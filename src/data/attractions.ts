@@ -1,6 +1,4 @@
 const API_URL = import.meta.env.VITE_API;
-// Backend origin used when rewriting absolute URLs to go through a dev proxy
-const BACKEND_ORIGIN = "http://cairogo.runasp.net";
 
 // Raw attraction coming from the backend API
 type ApiAttraction = {
@@ -104,7 +102,7 @@ const normaliseImageUrl = (rawUrl?: string): string | undefined => {
 
       // If we're using a Vite proxy (API_URL starts with "/") and this URL already
       // points at our backend origin, rewrite it so the browser calls the proxy
-      if (API_URL?.startsWith("/") && absolute.origin === BACKEND_ORIGIN) {
+      if (API_URL?.startsWith("/") && absolute.origin === API_URL) {
         const base = API_URL.replace(/\/$/, "");
         return `${base}${absolute.pathname}${absolute.search}${absolute.hash}`;
       }
@@ -158,7 +156,9 @@ const mapApiToAttraction = (
     placeId,
     title: name,
     description:
-      description || fullDescription || "No description available at the moment.",
+      description ||
+      fullDescription ||
+      "No description available at the moment.",
     fullDescription,
     photo: normaliseImageUrl(imageUrl),
     rating: safeRating,
@@ -218,7 +218,9 @@ export const fetchAttractions = async (): Promise<Attraction[]> => {
       const data: unknown = await response.json();
 
       const attractions = Array.isArray(data)
-        ? data.map((item, index) => mapApiToAttraction(item as ApiAttraction, index))
+        ? data.map((item, index) =>
+            mapApiToAttraction(item as ApiAttraction, index)
+          )
         : [];
 
       attractionsCache = attractions;
