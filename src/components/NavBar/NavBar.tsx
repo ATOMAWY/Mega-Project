@@ -196,14 +196,14 @@ const NavBar = () => {
                 <Link to="/settings">Settings</Link>
               </li>
               <li>
-                <button type="button" onClick={handleLogout}>
+                <button type="button" className="text-red-700 " onClick={handleLogout}>
                   Logout
                 </button>
               </li>
             </ul>
           </div>
         ) : (
-          <Link to="/login" className="btn bg-orange-400 ">
+          <Link to="/login" className="btn bg-orange-400 text-white hover:bg-orange-500">
             Login
           </Link>
         )}
