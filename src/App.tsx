@@ -16,12 +16,8 @@ import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ScrollToTop from "./components/Scroller/ScrollToTop";
-<<<<<<< HEAD
 import TripPlanner from "./pages/TripPlanner";
-=======
-import Welcome from "./components/Auth/Welcome";
 import RequireAuth from "./components/Auth/requireAuth";
->>>>>>> aly
 
 function App() {
   return (
