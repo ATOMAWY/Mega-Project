@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { register } from "../services/authService";
-import type { RegisterData } from "../types/auth";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../features/auth/slice";
+import { useRegisterMutation, type RegisterDto } from "../features/auth/authApiSlice";
 import {
   FaEnvelope,
   FaLock,
@@ -10,9 +11,32 @@ import {
   FaUser,
 } from "react-icons/fa";
 
+// Password validation helper
+const validatePassword = (password: string) => {
+  const errors: string[] = [];
+  
+  if (password.length < 8) {
+    errors.push("at least 8 characters");
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    errors.push("at least 1 uppercase letter");
+  }
+  
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    errors.push("at least 1 special character");
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors: errors.length > 0 ? ["Password must contain " + errors.join(", ")] : [],
+  };
+};
+
 const Register = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<RegisterData>({
+  const dispatch = useDispatch();
+  const [formData, setFormData] = useState<Partial<RegisterDto>>({
     fullName: "",
     email: "",
     age: undefined,
@@ -22,9 +46,10 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [register, { isLoading }] = useRegisterMutation();
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -53,8 +78,11 @@ const Register = () => {
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+    } else {
+      const passwordValidation = validatePassword(formData.password);
+      if (!passwordValidation.isValid) {
+        newErrors.password = passwordValidation.errors.join(", ");
+      }
     }
 
     if (!formData.confirmPassword) {
@@ -76,22 +104,41 @@ const Register = () => {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      const response = await register(formData);
-      
-      if (response.success) {
-        // Redirect to home page after successful registration
-        navigate("/");
-      } else {
-        setError(response.message || "Registration failed. Please try again.");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      // Register the user
+      const registerData = await register(formData as RegisterDto).unwrap();
+
+      // After successful registration, automatically log them in
+      // The backend returns access token and user info
+      const accessToken = registerData.data.user.accessToken;
+      const refreshToken = registerData.data.user.refreshToken;
+      const userInfo = registerData.data.user;
+
+      // Save tokens to localStorage
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", JSON.stringify(userInfo));
+
+      // Save to Redux
+      dispatch(
+        setCredentials({
+          accessToken,
+          refreshToken,
+          user: userInfo,
+        })
+      );
+
+      // Redirect to home page
+      navigate("/");
+    } catch (err: any) {
       console.error("Registration error:", err);
-    } finally {
-      setIsLoading(false);
+      if (err?.status === 400) {
+        setError(err?.data?.message || "Invalid registration data. Please check your inputs.");
+      } else if (err?.data?.message) {
+        setError(err.data.message);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
@@ -283,7 +330,7 @@ const Register = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="At least 8 characters"
+                  placeholder="Enter a strong password"
                   className={`input input-bordered w-full pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
                     errors.password ? "input-error" : ""
                   }`}
@@ -297,10 +344,16 @@ const Register = () => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              {errors.password && (
+              {errors.password ? (
                 <label className="label">
                   <span className="label-text-alt text-error">
                     {errors.password}
+                  </span>
+                </label>
+              ) : (
+                <label className="label">
+                  <span className="label-text-alt text-gray-500 text-xs">
+                    Must be 8+ characters, include 1 uppercase & 1 special character
                   </span>
                 </label>
               )}

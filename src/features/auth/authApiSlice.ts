@@ -1,5 +1,14 @@
 import { apiSlice } from "../../app/api/apiSlice";
 
+export interface RegisterDto {
+  fullName: string;
+  email: string;
+  age: number;
+  address: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -9,7 +18,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials },
       }),
     }),
+    register: builder.mutation({
+      query: (userData: RegisterDto) => ({
+        url: "/api/auth/register",
+        method: "POST",
+        body: { ...userData },
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation } = authApiSlice;
+export const { useLoginMutation, useRegisterMutation } = authApiSlice;

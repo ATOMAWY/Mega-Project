@@ -17,6 +17,45 @@ const ContactUs = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    } else if (formData.name.trim().length > 100) {
+      newErrors.name = "Name must not exceed 100 characters";
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    // Subject validation
+    if (!formData.subject) {
+      newErrors.subject = "Please select a subject";
+    }
+
+    // Message validation
+    if (!formData.message.trim()) {
+      newErrors.message = "Message is required";
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters";
+    } else if (formData.message.trim().length > 2000) {
+      newErrors.message = "Message must not exceed 2000 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -25,10 +64,23 @@ const ContactUs = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    setFormError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    setErrors({});
+
+    if (!validateForm()) {
+      setFormError("Please correct the errors below");
+      return;
+    }
+
     setIsSubmitting(true);
 
     // Simulate form submission
@@ -111,10 +163,10 @@ const ContactUs = () => {
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">
                 {submitted && (
-                  <div className="alert alert-success mb-6">
+                  <div className="alert alert-success bg-green-50 border border-green-200 mb-6">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="stroke-current shrink-0 h-6 w-6"
+                      className="stroke-current shrink-0 h-6 w-6 text-green-600"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -125,13 +177,32 @@ const ContactUs = () => {
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span>
+                    <span className="text-green-700">
                       Thank you! Your message has been sent successfully.
                     </span>
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {formError && (
+                  <div className="alert alert-error bg-red-50 border border-red-200 mb-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="stroke-current shrink-0 h-6 w-6 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span className="text-red-700">{formError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} noValidate className="space-y-6">
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-medium text-gray-700">
@@ -144,9 +215,17 @@ const ContactUs = () => {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Your name"
-                      className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      required
+                      className={`input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                        errors.name ? "input-error border-red-400" : ""
+                      }`}
                     />
+                    {errors.name && (
+                      <label className="label">
+                        <span className="label-text-alt text-error text-red-600">
+                          {errors.name}
+                        </span>
+                      </label>
+                    )}
                   </div>
 
                   <div className="form-control">
@@ -161,9 +240,17 @@ const ContactUs = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="your.email@example.com"
-                      className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      required
+                      className={`input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                        errors.email ? "input-error border-red-400" : ""
+                      }`}
                     />
+                    {errors.email && (
+                      <label className="label">
+                        <span className="label-text-alt text-error text-red-600">
+                          {errors.email}
+                        </span>
+                      </label>
+                    )}
                   </div>
 
                   <div className="form-control">
@@ -176,8 +263,9 @@ const ContactUs = () => {
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
-                      className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      required
+                      className={`select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                        errors.subject ? "select-error border-red-400" : ""
+                      }`}
                     >
                       <option value="">Select a subject</option>
                       <option value="general">General Inquiry</option>
@@ -186,6 +274,13 @@ const ContactUs = () => {
                       <option value="partnership">Partnership</option>
                       <option value="other">Other</option>
                     </select>
+                    {errors.subject && (
+                      <label className="label">
+                        <span className="label-text-alt text-error text-red-600">
+                          {errors.subject}
+                        </span>
+                      </label>
+                    )}
                   </div>
 
                   <div className="form-control">
@@ -200,9 +295,23 @@ const ContactUs = () => {
                       onChange={handleChange}
                       placeholder="Your message..."
                       rows={6}
-                      className="textarea textarea-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      required
+                      className={`textarea textarea-bordered w-full focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                        errors.message ? "textarea-error border-red-400" : ""
+                      }`}
                     />
+                    {errors.message ? (
+                      <label className="label">
+                        <span className="label-text-alt text-error text-red-600">
+                          {errors.message}
+                        </span>
+                      </label>
+                    ) : (
+                      <label className="label">
+                        <span className="label-text-alt text-gray-500">
+                          {formData.message.length}/2000 characters
+                        </span>
+                      </label>
+                    )}
                   </div>
 
                   <button
