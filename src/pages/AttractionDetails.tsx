@@ -1,9 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../app/api/store";
 import NavBar from "./../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import TrendingAttractions from "../components/TrendingAttractions/TrendingAttractions";
 import HiddenGems from "../components/HiddenGems/HiddenGems";
 import { fetchAttractions, type Attraction } from "../data/attractions";
+import {
+  useGetUserFavoritesQuery,
+  useAddFavoriteMutation,
+  useRemoveFavoriteMutation,
+} from "../features/favorites/favoritesApiSlice";
 import { LuPiggyBank } from "react-icons/lu";
 import { TbMapRoute } from "react-icons/tb";
 import { FaHeart } from "react-icons/fa";
@@ -12,18 +19,26 @@ import { HiClock, HiPhone, HiGlobeAlt } from "react-icons/hi2";
 import { MdAccessibility, MdLocalParking, MdLocationOn } from "react-icons/md";
 import { IoTimeOutline } from "react-icons/io5";
 import { useState, useEffect } from "react";
-import {
-  isFavorite,
-  toggleFavorite as toggleFavoriteService,
-} from "../services/favoritesService";
 
 const AttractionDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [isFavoriteState, setIsFavoriteState] = useState(false);
   const [hasImageError, setHasImageError] = useState(false);
   const [attractions, setAttractions] = useState<Attraction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [optimisticFavorite, setOptimisticFavorite] = useState<boolean | null>(null);
+
+  // Get user from Redux
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  // Fetch user's favorites from API
+  const { data: favoritesData } = useGetUserFavoritesQuery(user?.id || "", {
+    skip: !user?.id,
+  });
+
+  // Mutations for add/remove favorites
+  const [addFavorite] = useAddFavoriteMutation();
+  const [removeFavorite] = useRemoveFavoriteMutation();
 
   useEffect(() => {
     fetchAttractions().then((data) => {
@@ -41,29 +56,11 @@ const AttractionDetails = () => {
     );
   }) || null;
 
-  // Initialize favorite state from localStorage
-  useEffect(() => {
-    if (attraction?.id) {
-      setIsFavoriteState(isFavorite(attraction.id));
-    }
-  }, [attraction?.id]);
-
-  // Listen for favorite updates
-  useEffect(() => {
-    const handleFavoritesUpdated = () => {
-      if (attraction?.id) {
-        setIsFavoriteState(isFavorite(attraction.id));
-      }
-    };
-
-    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-    window.addEventListener("storage", handleFavoritesUpdated);
-
-    return () => {
-      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
-      window.removeEventListener("storage", handleFavoritesUpdated);
-    };
-  }, [attraction?.id]);
+  // Check if current place is favorited
+  const isFavoriteState =
+    optimisticFavorite !== null
+      ? optimisticFavorite
+      : favoritesData?.some((fav) => fav.placeId === attraction?.placeId) || false;
 
   // Show loading state
   if (loading) {
@@ -99,10 +96,48 @@ const AttractionDetails = () => {
     );
   }
 
-  const toggleFavorite = () => {
-    if (attraction?.id) {
-      const newState = toggleFavoriteService(attraction.id);
-      setIsFavoriteState(newState);
+  const toggleFavorite = async () => {
+    if (!user?.id || !attraction?.placeId) {
+      alert("Please log in to add favorites");
+      navigate("/login");
+      return;
+    }
+
+    // Optimistic update
+    const newState = !isFavoriteState;
+    setOptimisticFavorite(newState);
+
+    try {
+      if (isFavoriteState) {
+        // Remove from favorites
+        await removeFavorite({
+          userId: user.id,
+          placeId: attraction.placeId,
+        }).unwrap();
+      } else {
+        // Add to favorites
+        try {
+          await addFavorite({
+            userId: user.id,
+            placeId: attraction.placeId,
+          }).unwrap();
+        } catch (error: any) {
+          // Handle "Place Already exists" error silently
+          if (error?.data?.message?.includes("Place Already exists")) {
+            // Treat as success
+            return;
+          }
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      // Revert optimistic update on error
+      setOptimisticFavorite(!newState);
+      alert("Failed to update favorites. Please try again.");
+    } finally {
+      // Clear optimistic state after a short delay to let the API sync
+      setTimeout(() => setOptimisticFavorite(null), 500);
     }
   };
 

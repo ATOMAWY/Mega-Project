@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../app/api/store";
+import { useSubmitPreferencesMutation } from "../features/preferences/preferencesApiSlice";
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import {
@@ -13,21 +16,29 @@ import {
   FaHome,
   FaUmbrellaBeach,
   FaHiking,
+  FaPalette,
+  FaLandmark,
+  FaMapMarkerAlt,
+  FaCoffee,
+  FaShoppingCart,
+  FaHotel,
 } from "react-icons/fa";
 import {
   MdRestaurant,
   MdShoppingBag,
   MdMuseum,
-  MdNature,
   MdLocalMovies,
+  MdPark,
 } from "react-icons/md";
+import { GiPalmTree } from "react-icons/gi";
+
 
 type QuizAnswers = {
   travelVibe: string[]; // Multiple selections allowed
   activities: string[]; // Multiple selections allowed
   activityPreference: string | null;
   tripDuration: string | null;
-  budget: number | null; // Store as number for easier database handling
+  placeCategories: string[]; // Multiple selections allowed
 };
 
 // Type for API submission - ready for database
@@ -36,7 +47,7 @@ export type QuizSubmissionData = {
   activities: string[];
   activityPreference: string;
   tripDuration: number; // Convert to number
-  budget: number;
+  placeCategories: string[];
 };
 
 const Quiz = () => {
@@ -47,8 +58,14 @@ const Quiz = () => {
     activities: [],
     activityPreference: null,
     tripDuration: null,
-    budget: null,
+    placeCategories: [],
   });
+
+  // Get user info from Redux
+  const user = useSelector((state: RootState) => state.auth.user);
+  
+  // RTK Query mutation for submitting preferences
+  const [submitPreferences, { isLoading: isSubmitting }] = useSubmitPreferencesMutation();
 
   const questions = [
     {
@@ -89,6 +106,16 @@ const Quiz = () => {
           label: "Family",
           icon: <FaUsers className="text-2xl" />,
         },
+        {
+          value: "Art",
+          label: "Art",
+          icon: <FaPalette className="text-2xl" />,
+        },
+        {
+          value: "Historical",
+          label: "Historical",
+          icon: <FaLandmark className="text-2xl" />,
+        },
       ],
     },
     {
@@ -117,7 +144,7 @@ const Quiz = () => {
         {
           value: "Nature",
           label: "Nature",
-          icon: <MdNature className="text-2xl" />,
+          icon: <GiPalmTree className="text-2xl" />,
         },
         {
           value: "Entertainment",
@@ -161,10 +188,48 @@ const Quiz = () => {
       ],
     },
     {
-      id: "budget",
-      question: "What is your budget for this trip?",
-      instruction: "Enter your budget amount in EGP.",
-      type: "input",
+      id: "placeCategories",
+      question: "Which types of place category do you enjoy the most?",
+      instruction: "Select all the place categories you're interested in. You can select multiple options.",
+      type: "options",
+      allowMultiple: true,
+      options: [
+        {
+          value: "Attraction",
+          label: "Attraction",
+          icon: <FaMapMarkerAlt className="text-2xl" />,
+        },
+        {
+          value: "Restaurant",
+          label: "Restaurant",
+          icon: <MdRestaurant className="text-2xl" />,
+        },
+        {
+          value: "Cafe",
+          label: "Cafe",
+          icon: <FaCoffee className="text-2xl" />,
+        },
+        {
+          value: "Shopping",
+          label: "Shopping",
+          icon: <FaShoppingCart className="text-2xl" />,
+        },
+        {
+          value: "Museum",
+          label: "Museum",
+          icon: <MdMuseum className="text-2xl" />,
+        },
+        {
+          value: "Park",
+          label: "Park",
+          icon: <MdPark className="text-2xl" />,
+        },
+        {
+          value: "Hotel",
+          label: "Hotel",
+          icon: <FaHotel className="text-2xl" />,
+        },
+      ],
     },
   ];
 
@@ -187,10 +252,6 @@ const Quiz = () => {
     }
   };
 
-  const handleBudgetChange = (value: string) => {
-    const numValue = value === "" ? null : parseFloat(value);
-    setAnswers({ ...answers, budget: numValue });
-  };
 
   // Format answers for API/database submission
   const formatAnswersForSubmission = (): QuizSubmissionData | null => {
@@ -199,8 +260,7 @@ const Quiz = () => {
       answers.activities.length === 0 ||
       !answers.activityPreference ||
       !answers.tripDuration ||
-      !answers.budget ||
-      answers.budget <= 0
+      answers.placeCategories.length === 0
     ) {
       return null; // Not all questions answered
     }
@@ -210,7 +270,7 @@ const Quiz = () => {
       activities: answers.activities,
       activityPreference: answers.activityPreference,
       tripDuration: parseInt(answers.tripDuration),
-      budget: answers.budget,
+      placeCategories: answers.placeCategories,
     };
   };
 
@@ -221,25 +281,44 @@ const Quiz = () => {
       // Quiz completed - format and prepare for submission
       const submissionData = formatAnswersForSubmission();
       if (submissionData) {
-        // Store submission data in sessionStorage to pass to results page
-        sessionStorage.setItem("quizResults", JSON.stringify(submissionData));
+        // Check if user is logged in
+        if (!user?.id) {
+          alert("Please log in to submit your preferences.");
+          navigate("/login");
+          return;
+        }
 
-        // TODO: Send submissionData to your API endpoint
-        // Example:
-        // try {
-        //   const response = await fetch('/api/quiz/submit', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(submissionData)
-        //   });
-        //   const result = await response.json();
-        //   // Navigate to results with API response if needed
-        // } catch (error) {
-        //   console.error('Error submitting quiz:', error);
-        // }
+        try {
+          // Map quiz answers to backend DTO format
+          // activityPreference needs to be mapped: "indoor" -> "Indoor", "outdoor" -> "Outdoor"
+          const weatherPref = submissionData.activityPreference === "indoor" 
+            ? "Indoor" 
+            : submissionData.activityPreference === "outdoor" 
+            ? "Outdoor" 
+            : "Indoor"; // Default to Indoor for "mix"
 
-        // Navigate to results page
-        navigate("/quiz/results");
+          // Submit to API
+          await submitPreferences({
+            userId: user.id,
+            travelVibe: submissionData.travelVibe,
+            activityKinds: submissionData.activities,
+            weatherPref: weatherPref,
+            placeCategories: submissionData.placeCategories,
+            tripDays: submissionData.tripDuration,
+            budget: null, // Optional field, not collected in quiz
+          }).unwrap();
+
+          // Store submission data in sessionStorage to pass to results page
+          sessionStorage.setItem("quizResults", JSON.stringify(submissionData));
+
+          // Navigate to results page
+          navigate("/quiz/results");
+        } catch (error: any) {
+          console.error("Error submitting quiz:", error);
+          alert(
+            `Failed to submit quiz: ${error?.data?.message || "Please try again."}`
+          );
+        }
       }
     }
   };
@@ -256,10 +335,6 @@ const Quiz = () => {
 
   // Check if current question has valid answer(s)
   const isCurrentQuestionAnswered = () => {
-    if (currentQ.type === "input") {
-      return answers.budget !== null && answers.budget > 0;
-    }
-
     if (currentQ.allowMultiple) {
       const answerArray = currentAnswer as string[];
       return Array.isArray(answerArray) && answerArray.length > 0;
@@ -303,65 +378,46 @@ const Quiz = () => {
             {currentQ.instruction}
           </p>
 
-          {/* Options or Input */}
-          {currentQ.type === "options" ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
-              {currentQ.options?.map((option) => {
-                const isSelected = currentQ.allowMultiple
-                  ? (currentAnswer as string[]).includes(option.value)
-                  : currentAnswer === option.value;
+          {/* Options */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
+            {currentQ.options?.map((option) => {
+              const isSelected = currentQ.allowMultiple
+                ? (currentAnswer as string[]).includes(option.value)
+                : currentAnswer === option.value;
 
-                return (
-                  <button
-                    key={option.value}
-                    onClick={() => handleOptionSelect(option.value)}
-                    className={`relative flex flex-col items-center justify-center p-4 sm:p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${
-                      isSelected
-                        ? "border-orange-400 bg-orange-50"
-                        : "border-gray-200 bg-white hover:border-orange-300"
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => handleOptionSelect(option.value)}
+                  className={`relative flex flex-col items-center justify-center p-4 sm:p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${
+                    isSelected
+                      ? "border-orange-400 bg-orange-50"
+                      : "border-gray-200 bg-white hover:border-orange-300"
+                  }`}
+                >
+                  {currentQ.allowMultiple && isSelected && (
+                    <div className="absolute top-2 right-2 w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">✓</span>
+                    </div>
+                  )}
+                  <div
+                    className={`mb-2 sm:mb-3 ${
+                      isSelected ? "text-orange-400" : "text-gray-600"
                     }`}
                   >
-                    {currentQ.allowMultiple && isSelected && (
-                      <div className="absolute top-2 right-2 w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">✓</span>
-                      </div>
-                    )}
-                    <div
-                      className={`mb-2 sm:mb-3 ${
-                        isSelected ? "text-orange-400" : "text-gray-600"
-                      }`}
-                    >
-                      {option.icon}
-                    </div>
-                    <span
-                      className={`text-xs sm:text-sm font-medium text-center ${
-                        isSelected ? "text-orange-700" : "text-gray-700"
-                      }`}
-                    >
-                      {option.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="mb-8 sm:mb-10">
-              <div className="relative">
-                <input
-                  type="number"
-                  value={answers.budget || ""}
-                  onChange={(e) => handleBudgetChange(e.target.value)}
-                  placeholder="Enter amount in EGP"
-                  className="w-full px-4 sm:px-6 py-3 sm:py-4 pr-16 text-base sm:text-lg border-2 border-gray-200 rounded-lg focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
-                  min="0"
-                  step="100"
-                />
-                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 -translate-x-full text-gray-500 font-medium">
-                  EGP
-                </span>
-              </div>
-            </div>
-          )}
+                    {option.icon}
+                  </div>
+                  <span
+                    className={`text-xs sm:text-sm font-medium text-center ${
+                      isSelected ? "text-orange-700" : "text-gray-700"
+                    }`}
+                  >
+                    {option.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
           {/* Navigation Buttons */}
           <div className="flex justify-between gap-4">
@@ -378,14 +434,18 @@ const Quiz = () => {
             </button>
             <button
               onClick={handleNext}
-              disabled={!isCurrentQuestionAnswered()}
+              disabled={!isCurrentQuestionAnswered() || isSubmitting}
               className={`px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-all ${
-                !isCurrentQuestionAnswered()
+                !isCurrentQuestionAnswered() || isSubmitting
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                   : "bg-orange-400 text-white hover:bg-orange-500"
               }`}
             >
-              {currentQuestion === questions.length - 1 ? "Submit" : "Next"}
+              {isSubmitting
+                ? "Submitting..."
+                : currentQuestion === questions.length - 1
+                ? "Submit"
+                : "Next"}
             </button>
           </div>
         </div>
