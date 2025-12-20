@@ -1353,7 +1353,6 @@
             "in": "query",
             "schema": {
               "enum": [
-                "Romantic",
                 "Calm",
                 "Adventure",
                 "Photography",
@@ -1648,130 +1647,6 @@
         }
       }
     },
-    "/api/Preference/{userId}/activity": {
-      "post": {
-        "tags": [
-          "Preference"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "enum": [
-                  "Dining",
-                  "Shopping",
-                  "Cultural",
-                  "Nature",
-                  "Entertainment"
-                ],
-                "type": "string"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "enum": [
-                  "Dining",
-                  "Shopping",
-                  "Cultural",
-                  "Nature",
-                  "Entertainment"
-                ],
-                "type": "string"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "enum": [
-                  "Dining",
-                  "Shopping",
-                  "Cultural",
-                  "Nature",
-                  "Entertainment"
-                ],
-                "type": "string"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Preference"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "enum": [
-                  "Dining",
-                  "Shopping",
-                  "Cultural",
-                  "Nature",
-                  "Entertainment"
-                ],
-                "type": "string"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "enum": [
-                  "Dining",
-                  "Shopping",
-                  "Cultural",
-                  "Nature",
-                  "Entertainment"
-                ],
-                "type": "string"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "enum": [
-                  "Dining",
-                  "Shopping",
-                  "Cultural",
-                  "Nature",
-                  "Entertainment"
-                ],
-                "type": "string"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Preference/update/{profileId}": {
       "post": {
         "tags": [
@@ -1814,14 +1689,78 @@
         }
       }
     },
-    "/api/Preference/activities/{userId}": {
-      "get": {
+    "/api/Preference/{userId}/activity/{activityId}": {
+      "post": {
         "tags": [
           "Preference"
         ],
         "parameters": [
           {
             "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Preference/{profileId}/activity/{activityId}": {
+      "delete": {
+        "tags": [
+          "Preference"
+        ],
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Preference/activities/{profileId}": {
+      "get": {
+        "tags": [
+          "Preference"
+        ],
+        "parameters": [
+          {
+            "name": "profileId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3390,6 +3329,48 @@
           }
         }
       }
+    },
+    "/api/UserProfile/upload-profile-picture": {
+      "post": {
+        "tags": [
+          "UserProfile"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "File",
+                  "Name"
+                ],
+                "type": "object",
+                "properties": {
+                  "Name": {
+                    "type": "string"
+                  },
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "Name": {
+                  "style": "form"
+                },
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3559,7 +3540,6 @@
           },
           "value": {
             "enum": [
-              "Romantic",
               "Calm",
               "Adventure",
               "Photography",
@@ -3575,8 +3555,7 @@
       },
       "CreatePreferenceDto": {
         "required": [
-          "activityKinds",
-          "placeCategories",
+          "activityTypeIds",
           "travelVibe",
           "tripDays",
           "userId",
@@ -3589,25 +3568,16 @@
             "format": "uuid"
           },
           "travelVibe": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "Romantic",
-                "Calm",
-                "Adventure",
-                "Photography",
-                "Foodie",
-                "Family",
-                "Art",
-                "Historical"
-              ],
-              "type": "string"
-            }
-          },
-          "budget": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
+            "enum": [
+              "Calm",
+              "Adventure",
+              "Photography",
+              "Foodie",
+              "Family",
+              "Art",
+              "Historical"
+            ],
+            "type": "string"
           },
           "weatherPref": {
             "enum": [
@@ -3616,39 +3586,18 @@
             ],
             "type": "string"
           },
-          "placeCategories": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "Attraction",
-                "Restaurant",
-                "Cafe",
-                "Shopping",
-                "Museum",
-                "Park",
-                "Hotel"
-              ],
-              "type": "string"
-            }
-          },
           "tripDays": {
             "maximum": 4,
             "minimum": 1,
             "type": "integer",
             "format": "int32"
           },
-          "activityKinds": {
+          "activityTypeIds": {
             "minItems": 1,
             "type": "array",
             "items": {
-              "enum": [
-                "Dining",
-                "Shopping",
-                "Cultural",
-                "Nature",
-                "Entertainment"
-              ],
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         },
@@ -4323,7 +4272,6 @@
             "maxLength": 50,
             "minLength": 3,
             "enum": [
-              "Romantic",
               "Calm",
               "Adventure",
               "Photography",
@@ -4346,7 +4294,6 @@
       },
       "PreferenceProfile": {
         "required": [
-          "activityKinds",
           "placeCategories",
           "travelVibe",
           "tripDays",
@@ -4364,53 +4311,28 @@
             "format": "uuid"
           },
           "travelVibe": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "Romantic",
-                "Calm",
-                "Adventure",
-                "Photography",
-                "Foodie",
-                "Family",
-                "Art",
-                "Historical"
-              ],
-              "type": "string"
-            }
-          },
-          "activityKinds": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "Dining",
-                "Shopping",
-                "Cultural",
-                "Nature",
-                "Entertainment"
-              ],
-              "type": "string"
-            }
-          },
-          "budget": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
+            "enum": [
+              "Calm",
+              "Adventure",
+              "Photography",
+              "Foodie",
+              "Family",
+              "Art",
+              "Historical"
+            ],
+            "type": "string"
           },
           "placeCategories": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "Attraction",
-                "Restaurant",
-                "Cafe",
-                "Shopping",
-                "Museum",
-                "Park",
-                "Hotel"
-              ],
-              "type": "string"
-            }
+            "enum": [
+              "Attraction",
+              "Restaurant",
+              "Cafe",
+              "Shopping",
+              "Museum",
+              "Park",
+              "Hotel"
+            ],
+            "type": "string"
           },
           "weatherPref": {
             "enum": [
@@ -4431,6 +4353,13 @@
           },
           "user": {
             "$ref": "#/components/schemas/UserApplication"
+          },
+          "activityTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityType"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5242,7 +5171,6 @@
         "properties": {
           "value": {
             "enum": [
-              "Romantic",
               "Calm",
               "Adventure",
               "Photography",
@@ -5261,25 +5189,16 @@
         "type": "object",
         "properties": {
           "travelVibe": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "Romantic",
-                "Calm",
-                "Adventure",
-                "Photography",
-                "Foodie",
-                "Family",
-                "Art",
-                "Historical"
-              ],
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "budget": {
-            "type": "number",
-            "format": "double",
+            "enum": [
+              "Calm",
+              "Adventure",
+              "Photography",
+              "Foodie",
+              "Family",
+              "Art",
+              "Historical"
+            ],
+            "type": "string",
             "nullable": true
           },
           "weatherPref": {
@@ -5295,33 +5214,11 @@
             "format": "int32",
             "nullable": true
           },
-          "placeCategories": {
+          "activityTypeIds": {
             "type": "array",
             "items": {
-              "enum": [
-                "Attraction",
-                "Restaurant",
-                "Cafe",
-                "Shopping",
-                "Museum",
-                "Park",
-                "Hotel"
-              ],
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "activityKinds": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "Dining",
-                "Shopping",
-                "Cultural",
-                "Nature",
-                "Entertainment"
-              ],
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             },
             "nullable": true
           }
