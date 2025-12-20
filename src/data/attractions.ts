@@ -70,6 +70,14 @@ export type Attraction = {
   indoorOutdoor?: string;
   bestTimeOfDay?: string;
   avgVisitDurationMinutes?: number;
+  /** Optional favorite status (used in favorites page) */
+  isFavorite?: boolean;
+  /** Optional favorite metadata (used in favorites page) */
+  favoriteData?: {
+    placeId: number;
+    userCategory?: string;
+    createdAt: string;
+  };
   /** Keep the original API object around in case we need extra fields */
   raw: ApiAttraction;
 };
