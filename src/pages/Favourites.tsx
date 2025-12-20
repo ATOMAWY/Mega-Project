@@ -110,7 +110,7 @@ const Favourites = () => {
   }, [favoriteAttractions, selectedCategory, sortBy]);
 
   // Handle category update (not implemented in backend yet)
-  const handleCategoryUpdate = (placeId: number, category: string) => {
+  const handleCategoryUpdate = (_placeId: number, _category: string) => {
     // TODO: Backend doesn't have update category endpoint yet
     setEditingCategory(null);
     setNewCategory("");
