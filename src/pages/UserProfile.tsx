@@ -88,9 +88,9 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50">
       {/* Page Title */}
-      <div className="bg-white border-b px-4 sm:px-8 py-4 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-b px-4 sm:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             className="lg:hidden text-gray-700"
@@ -112,10 +112,10 @@ const UserProfile = () => {
         </div>
       </div>
 
-      <div className="flex relative">
+      <div className="flex relative flex-1 overflow-hidden">
         {/* Sidebar - Mobile Drawer */}
         <div
-          className={`fixed lg:relative inset-y-0 left-0 z-50 w-64 lg:w-48 bg-white border-r transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:relative inset-y-0 lg:h-full left-0 z-50 w-64 lg:w-48 bg-white border-r transform transition-transform duration-300 ease-in-out ${
             isMobileMenuOpen
               ? "translate-x-0"
               : "-translate-x-full lg:translate-x-0"
