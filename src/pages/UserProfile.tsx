@@ -86,10 +86,6 @@ const UserProfile = () => {
     setTempValue("");
   };
 
-  const handleToggle = (field: keyof typeof preferences) => {
-    setPreferences({ ...preferences, [field]: !preferences[field] });
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
@@ -156,14 +152,6 @@ const UserProfile = () => {
               <FaUser className="text-sm" />
               <span className="text-sm font-medium">User Profile</span>
             </Link>
-            <Link
-              to="/settings"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-6 py-3 hover:bg-gray-50 text-gray-700"
-            >
-              <FaCog className="text-sm" />
-              <span className="text-sm font-medium">Settings</span>
-            </Link>
           </div>
 
           {/* Logout at bottom */}
@@ -217,7 +205,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Personal Information */}
-                <div className="mb-8 pb-8 border-b">
+                <div className="mb-8">
                   <h3 className="text-sm sm:text-base font-semibold mb-4">
                     Personal Information
                   </h3>
@@ -423,49 +411,6 @@ const UserProfile = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Preferences */}
-                <div className="mb-8 pb-8 border-b">
-                  <h3 className="text-sm sm:text-base font-semibold mb-4">
-                    Preferences
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">
-                        Receive Email Notifications
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
-                        checked={preferences.emailNotifications}
-                        onChange={() => handleToggle("emailNotifications")}
-                      />
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">
-                        Enable Dark Mode
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
-                        checked={preferences.darkMode}
-                        onChange={() => handleToggle("darkMode")}
-                      />
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">
-                        Show Travel Reminders
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
-                        checked={preferences.travelReminders}
-                        onChange={() => handleToggle("travelReminders")}
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* Footer */}
                 <div className="text-center text-xs text-gray-500 mt-6 pt-6 border-t">
                   © 2025 Mini Trip Planner. All rights reserved.

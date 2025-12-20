@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import UserProfile from "./pages/UserProfile";
-import Settings from "./pages/Settings";
 import Recommendations from "./pages/Recommendations";
 import Quiz from "./pages/Quiz";
 import QuizResults from "./pages/QuizResults";
@@ -44,7 +43,6 @@ function App() {
         <Route element={<RequireAuth />}>
           {" "}
           <Route path="/profile" element={<UserProfile />} />
-          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
     </Router>
