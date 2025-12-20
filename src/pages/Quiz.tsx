@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../app/api/store";
-import { useSubmitPreferencesMutation } from "../features/preferences/preferencesApiSlice";
+import { 
+  useGetUserPreferencesQuery,
+  useSubmitPreferencesMutation,
+  useUpdatePreferencesMutation,
+} from "../features/preferences/preferencesApiSlice";
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import {
@@ -56,8 +60,15 @@ const Quiz = () => {
   // Get user info from Redux
   const user = useSelector((state: RootState) => state.auth.user);
   
-  // RTK Query mutation for submitting preferences
+  // Check if user has existing preferences
+  const { data: existingPreferences, isLoading: isCheckingPreferences } = useGetUserPreferencesQuery(
+    user?.id || "",
+    { skip: !user?.id }
+  );
+  
+  // RTK Query mutations for creating/updating preferences
   const [submitPreferences, { isLoading: isSubmitting }] = useSubmitPreferencesMutation();
+  const [updatePreferences, { isLoading: isUpdating }] = useUpdatePreferencesMutation();
 
   // Fetch activity types from API on mount
   useEffect(() => {
@@ -227,8 +238,22 @@ const Quiz = () => {
       }
 
       try {
-        // Submit to API with new format
-        await submitPreferences(submissionData).unwrap();
+        // Check if user has existing preferences - update or create
+        if (existingPreferences?.profileId) {
+          // Update existing preferences
+          await updatePreferences({
+            profileId: existingPreferences.profileId,
+            data: {
+              travelVibe: submissionData.travelVibe,
+              activityTypeIds: submissionData.activityTypeIds,
+              weatherPref: submissionData.weatherPref,
+              tripDays: submissionData.tripDays,
+            },
+          }).unwrap();
+        } else {
+          // Create new preferences
+          await submitPreferences(submissionData).unwrap();
+        }
 
         // Store submission data in sessionStorage to pass to results page
         sessionStorage.setItem("quizResults", JSON.stringify(submissionData));
@@ -238,7 +263,7 @@ const Quiz = () => {
       } catch (error: any) {
         console.error("Error submitting quiz:", error);
         alert(
-          `Failed to submit quiz: ${error?.data?.message || "Please try again."}`
+          `Failed to ${existingPreferences?.profileId ? "update" : "submit"} quiz: ${error?.data?.message || "Please try again."}`
         );
       }
     }
@@ -260,8 +285,8 @@ const Quiz = () => {
     return currentAnswer !== null && currentAnswer !== "";
   };
 
-  // Show loading state while fetching activity types
-  if (loadingActivities) {
+  // Show loading state while fetching activity types or checking preferences
+  if (loadingActivities || isCheckingPreferences) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <NavBar />
@@ -361,17 +386,21 @@ const Quiz = () => {
             </button>
             <button
               onClick={handleNext}
-              disabled={!isCurrentQuestionAnswered() || isSubmitting}
+              disabled={!isCurrentQuestionAnswered() || isSubmitting || isUpdating}
               className={`px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-all ${
-                !isCurrentQuestionAnswered() || isSubmitting
+                !isCurrentQuestionAnswered() || isSubmitting || isUpdating
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                   : "bg-orange-400 text-white hover:bg-orange-500"
               }`}
             >
-              {isSubmitting
-                ? "Submitting..."
+              {isSubmitting || isUpdating
+                ? existingPreferences?.profileId
+                  ? "Updating..."
+                  : "Submitting..."
                 : currentQuestion === questions.length - 1
-                ? "Submit"
+                ? existingPreferences?.profileId
+                  ? "Update Preferences"
+                  : "Submit"
                 : "Next"}
             </button>
           </div>
