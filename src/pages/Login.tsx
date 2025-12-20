@@ -57,7 +57,7 @@ const Login = () => {
         })
       );
 
-      navigate("/test");
+      navigate("/");
     } catch (err) {
       console.log(err);
     }
@@ -141,12 +141,6 @@ const Login = () => {
                 />
                 <span className="label-text text-gray-600">Remember me</span>
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-orange-500 hover:text-orange-600 hover:underline"
-              >
-                Forgot password?
-              </Link>
             </div>
 
             {/* Submit Button */}
@@ -183,7 +177,7 @@ const Login = () => {
         {/* Back to Home Link */}
         <div className="text-center mt-6">
           <Link
-            to="/test"
+            to="/"
             className="text-gray-500 hover:text-gray-700 text-sm hover:underline"
           >
             ← Back to home

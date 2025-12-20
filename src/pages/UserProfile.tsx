@@ -10,10 +10,12 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const user = useSelector(selectCurrentUser);
   const token = useSelector(selectCurrentToken);
-
-  useEffect(() => {
-    console.log(user);
-  }, []);
+  const [userInfo, setUserInfo] = useState({
+            fullName: user?.fullName || "...",
+            email: user?.email || "...",
+            phoneNumber: user?.phoneNumber || "...",
+            address: user?.address || "...",
+        });
 
   const [preferences, setPreferences] = useState({
     emailNotifications: true,
@@ -21,12 +23,33 @@ const UserProfile = () => {
     travelReminders: true,
   });
 
-  const [userInfo, setUserInfo] = useState({
-    fullName: user?.fullName || "John Doe",
-    email: user?.email || "",
-    phoneNumber: user?.phoneNumber || "123-456-7890",
-    address: user?.address || "123 Main St, Anytown, USA",
-  });
+
+    useEffect(() => {
+    const fetchUserData = async () => {
+
+      try {
+        const response = await fetch(
+          "https://cairogo.runasp.net/api/Auth/me",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+        console.log(data.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

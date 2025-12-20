@@ -42,7 +42,6 @@ function App() {
         {/* protected routes */}
         <Route element={<RequireAuth />}>
           {" "}
-          <Route path="/test" element={<Welcome />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
