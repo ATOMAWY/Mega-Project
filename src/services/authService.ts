@@ -97,19 +97,39 @@ export const register = async (data: RegisterData & { confirmPassword?: string }
   const API_URL = import.meta.env.VITE_API || "https://cairogo.runasp.net";
   
   try {
+    // Validate required fields before sending
+    if (!data.age || data.age < 13 || data.age > 120) {
+      return { success: false, message: "Age must be between 13 and 120" };
+    }
+    
+    if (!data.fullName?.trim()) {
+      return { success: false, message: "Full name is required" };
+    }
+    
+    if (!data.email?.trim()) {
+      return { success: false, message: "Email is required" };
+    }
+    
+    if (!data.password || data.password.length < 8) {
+      return { success: false, message: "Password must be at least 8 characters" };
+    }
+
+    // Ensure all required fields are present and properly formatted
+    const requestBody = {
+      fullName: data.fullName.trim(),
+      email: data.email.trim(),
+      age: data.age,
+      address: data.address?.trim() || "",
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+    };
+
     const response = await fetch(`${API_URL}/api/Auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        fullName: data.fullName,
-        email: data.email,
-        age: data.age,
-        address: data.address,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -117,10 +137,29 @@ export const register = async (data: RegisterData & { confirmPassword?: string }
       return { success: false, message: errorData.message || "Registration failed" };
     }
     
-    // The API response structure may vary, adjust based on actual response
-    // Assuming the response contains user data and token
+    // Registration successful
+    // Parse response if available, but don't require user/token for success
+    const responseData = await response.json().catch(() => null);
+    
+    if (responseData) {
+      // Adjust based on actual API response structure
+      // Common patterns: { user, token } or { data: { user, token } }
+      const user = responseData.user || responseData.data?.user;
+      const token = responseData.token || responseData.data?.token;
+      
+      if (user && token) {
+        const authState: AuthState = {
+          isAuthenticated: true,
+          user,
+          token,
+        };
+        localStorage.setItem(AUTH_STATE_KEY, JSON.stringify(authState));
+        return { success: true, user, token };
+      }
+    }
 
-    return { success: false, message: "Invalid response from server" };
+    // Return success even if we don't have user/token data
+    return { success: true };
   } catch (error) {
     console.error("Registration error:", error);
     return { success: false, message: "Network error. Please try again." };

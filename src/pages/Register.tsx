@@ -13,13 +13,13 @@ import {
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<RegisterData>({
-    email: "",
-    password: "",
     fullName: "",
+    email: "",
     age: undefined,
     address: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +31,8 @@ const Register = () => {
 
     if (!formData.fullName.trim()) {
       newErrors.fullName = "Full name is required";
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = "Full name must be at least 2 characters";
     }
 
     if (!formData.email.trim()) {
@@ -39,15 +41,25 @@ const Register = () => {
       newErrors.email = "Please enter a valid email address";
     }
 
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    if (!formData.age) {
+      newErrors.age = "Age is required";
+    } else if (formData.age < 13 || formData.age > 120) {
+      newErrors.age = "Age must be between 13 and 120";
     }
 
-    if (!confirmPassword) {
+    if (!formData.address?.trim()) {
+      newErrors.address = "Address is required";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+
+    if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== confirmPassword) {
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
@@ -67,13 +79,11 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const response = await register({ ...formData, confirmPassword });
-
-      if (response.success && response.user) {
+      const response = await register(formData);
+      
+      if (response.success) {
         // Redirect to home page after successful registration
         navigate("/");
-        // Optionally reload to update auth state across the app
-        window.location.reload();
       } else {
         setError(response.message || "Registration failed. Please try again.");
       }
@@ -194,12 +204,11 @@ const Register = () => {
               )}
             </div>
 
-            {/* Age Field (Optional) */}
+            {/* Age Field */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium text-gray-700">
-                  Age{" "}
-                  <span className="text-gray-400 text-xs">(Optional)</span>
+                  Age
                 </span>
               </label>
               <input
@@ -209,20 +218,33 @@ const Register = () => {
                 onChange={(e) => {
                   const value = e.target.value === "" ? undefined : parseInt(e.target.value, 10);
                   setFormData((prev) => ({ ...prev, age: value }));
+                  // Clear error for this field when user starts typing
+                  if (errors.age) {
+                    setErrors((prev) => ({ ...prev, age: "" }));
+                  }
                 }}
-                placeholder="Enter your age"
-                min="1"
+                placeholder="Enter your age (13-120)"
+                min="13"
                 max="120"
-                className="input input-bordered w-full py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className={`input input-bordered w-full py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                  errors.age ? "input-error" : ""
+                }`}
+                required
               />
+              {errors.age && (
+                <label className="label">
+                  <span className="label-text-alt text-error">
+                    {errors.age}
+                  </span>
+                </label>
+              )}
             </div>
 
-            {/* Address Field (Optional) */}
+            {/* Address Field */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium text-gray-700">
-                  Address{" "}
-                  <span className="text-gray-400 text-xs">(Optional)</span>
+                  Address
                 </span>
               </label>
               <input
@@ -231,8 +253,18 @@ const Register = () => {
                 value={formData.address}
                 onChange={handleChange}
                 placeholder="123 Main St, City, Country"
-                className="input input-bordered w-full py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className={`input input-bordered w-full py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
+                  errors.address ? "input-error" : ""
+                }`}
+                required
               />
+              {errors.address && (
+                <label className="label">
+                  <span className="label-text-alt text-error">
+                    {errors.address}
+                  </span>
+                </label>
+              )}
             </div>
 
             {/* Password Field */}
@@ -251,7 +283,7 @@ const Register = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters"
                   className={`input input-bordered w-full pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
                     errors.password ? "input-error" : ""
                   }`}
@@ -288,13 +320,8 @@ const Register = () => {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (errors.confirmPassword) {
-                      setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-                    }
-                  }}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
                   placeholder="Re-enter your password"
                   className={`input input-bordered w-full pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 ${
                     errors.confirmPassword ? "input-error" : ""
