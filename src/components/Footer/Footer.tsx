@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import logo from "../../media/CairoGO_logo (1).svg";
 
 const Footer = () => {
   const exploreLinks = [
@@ -40,7 +41,7 @@ const Footer = () => {
               Your AI-powered guide to Cairo & Giza.
             </p>
 
-            <img src="src\media\CairoGO_logo.png" className="w-2/6" />
+            <img src={logo} alt="Cairo GO Logo" className="w-2/6" />
           </div>
 
           {/* Explore Section */}
