@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaHome } from "react-icons/fa";
 import { FaLightbulb } from "react-icons/fa";
@@ -10,7 +10,6 @@ import { logOut, selectCurrentToken } from "../../features/auth/slice";
 
 const NavBar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentPath = location.pathname;
   const accessToken = useSelector(selectCurrentToken);
