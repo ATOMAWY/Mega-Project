@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaCog, FaBars, FaHome } from "react-icons/fa";
+import { FaUser, FaBars, FaHome } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentToken, selectCurrentUser, setUser, logOut } from "../features/auth/slice";
@@ -17,12 +17,6 @@ const UserProfile = () => {
             age: user?.age || 0,
             joinDate: user?.joinDate || "",
         });
-
-  const [preferences, setPreferences] = useState({
-    emailNotifications: true,
-    darkMode: false,
-    travelReminders: true,
-  });
 
 
     useEffect(() => {
@@ -86,10 +80,6 @@ const UserProfile = () => {
     setTempValue("");
   };
 
-  const handleToggle = (field: keyof typeof preferences) => {
-    setPreferences({ ...preferences, [field]: !preferences[field] });
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
@@ -98,9 +88,9 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50">
       {/* Page Title */}
-      <div className="bg-white border-b px-4 sm:px-8 py-4 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-b px-4 sm:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             className="lg:hidden text-gray-700"
@@ -122,10 +112,10 @@ const UserProfile = () => {
         </div>
       </div>
 
-      <div className="flex relative">
+      <div className="flex relative flex-1 overflow-hidden">
         {/* Sidebar - Mobile Drawer */}
         <div
-          className={`fixed lg:relative inset-y-0 left-0 z-50 w-64 lg:w-48 bg-white border-r transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:relative inset-y-0 lg:h-full left-0 z-50 w-64 lg:w-48 bg-white border-r transform transition-transform duration-300 ease-in-out ${
             isMobileMenuOpen
               ? "translate-x-0"
               : "-translate-x-full lg:translate-x-0"
@@ -155,14 +145,6 @@ const UserProfile = () => {
             >
               <FaUser className="text-sm" />
               <span className="text-sm font-medium">User Profile</span>
-            </Link>
-            <Link
-              to="/settings"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-6 py-3 hover:bg-gray-50 text-gray-700"
-            >
-              <FaCog className="text-sm" />
-              <span className="text-sm font-medium">Settings</span>
             </Link>
           </div>
 
@@ -217,7 +199,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Personal Information */}
-                <div className="mb-8 pb-8 border-b">
+                <div className="mb-8">
                   <h3 className="text-sm sm:text-base font-semibold mb-4">
                     Personal Information
                   </h3>
@@ -423,49 +405,6 @@ const UserProfile = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Preferences */}
-                <div className="mb-8 pb-8 border-b">
-                  <h3 className="text-sm sm:text-base font-semibold mb-4">
-                    Preferences
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">
-                        Receive Email Notifications
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
-                        checked={preferences.emailNotifications}
-                        onChange={() => handleToggle("emailNotifications")}
-                      />
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">
-                        Enable Dark Mode
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
-                        checked={preferences.darkMode}
-                        onChange={() => handleToggle("darkMode")}
-                      />
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-900">
-                        Show Travel Reminders
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle border-1 border-orange-200 bg-gray-300 checked:bg-orange-500 hover:bg-gray-400"
-                        checked={preferences.travelReminders}
-                        onChange={() => handleToggle("travelReminders")}
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* Footer */}
                 <div className="text-center text-xs text-gray-500 mt-6 pt-6 border-t">
                   © 2025 Mini Trip Planner. All rights reserved.

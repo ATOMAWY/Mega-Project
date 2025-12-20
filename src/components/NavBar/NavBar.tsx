@@ -193,9 +193,6 @@ const NavBar = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/settings">Settings</Link>
-              </li>
-              <li>
                 <button type="button" className="text-red-700 " onClick={handleLogout}>
                   Logout
                 </button>
