@@ -803,6 +803,25 @@
         "tags": [
           "MLRecommendation"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRecommendationsRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRecommendationsRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRecommendationsRequestDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -3937,7 +3956,11 @@
       "MLFeedbackInputDto": {
         "type": "object",
         "properties": {
-          "itemName": {
+          "user_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "item_name": {
             "type": "string",
             "nullable": true
           },

@@ -43,6 +43,7 @@ const RecommendedCards = ({
             userCategory={attraction.favoriteData?.userCategory}
             isEditingCategory={editingCategory === attraction.id}
             newCategory={newCategory || ""}
+            mlScore={attraction.mlScore}
             onRemoveFavorite={
               onRemoveFavorite && attraction.placeId
                 ? () => onRemoveFavorite(attraction.placeId)

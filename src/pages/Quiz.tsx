@@ -77,6 +77,9 @@ const Quiz = () => {
         const API_URL = import.meta.env.VITE_API;
         const token = localStorage.getItem("accessToken");
         
+        console.log("Fetching activity types from:", `${API_URL}/api/ActivityType`);
+        console.log("Using token:", token ? "Present" : "Missing");
+        
         const response = await fetch(`${API_URL}/api/ActivityType`, {
           headers: {
             "Content-Type": "application/json",
@@ -86,9 +89,11 @@ const Quiz = () => {
 
         if (response.ok) {
           const data = await response.json();
+          console.log("Activity types loaded successfully:", data.length, "types");
           setActivityTypes(data);
         } else {
-          console.error("Failed to fetch activity types");
+          console.error("Failed to fetch activity types. Status:", response.status);
+          console.error("Response:", await response.text());
         }
       } catch (error) {
         console.error("Error fetching activity types:", error);
@@ -202,6 +207,12 @@ const Quiz = () => {
 
     // Send ALL activity type IDs (backend auto-manages them)
     const activityTypeIds = activityTypes.map((at) => at.activityTypeId);
+    
+    // Validate that we have activity types
+    if (activityTypeIds.length === 0) {
+      console.error("No activity types available for submission");
+      return null;
+    }
 
     // Map activityPreference to weatherPref format
     const weatherPref = answers.activityPreference === "indoor" 
@@ -226,7 +237,7 @@ const Quiz = () => {
       // Quiz completed - format and prepare for submission
       const submissionData = formatAnswersForSubmission();
       if (!submissionData) {
-        alert("Please answer all questions before submitting.");
+        alert("Please answer all questions before submitting. If you've answered all questions, there may be an issue loading activity types. Please refresh the page and try again.");
         return;
       }
 
@@ -236,23 +247,39 @@ const Quiz = () => {
         navigate("/login");
         return;
       }
+      
+      // Double-check that activity types were loaded
+      if (activityTypes.length === 0) {
+        alert("Failed to load activity types. Please refresh the page and try again.");
+        return;
+      }
 
       try {
+        // Log submission data for debugging
+        console.log("Quiz submission data:", JSON.stringify(submissionData, null, 2));
+        console.log("Activity types count:", submissionData.activityTypeIds.length);
+        console.log("Existing preferences:", existingPreferences);
+        
         // Check if user has existing preferences - update or create
         if (existingPreferences?.profileId) {
-          // Update existing preferences
-          await updatePreferences({
+          // Update existing preferences WITHOUT activityTypeIds
+          // (backend might require separate calls to manage activities)
+          console.log("Updating preferences for profileId:", existingPreferences.profileId);
+          const result = await updatePreferences({
             profileId: existingPreferences.profileId,
             data: {
               travelVibe: submissionData.travelVibe,
-              activityTypeIds: submissionData.activityTypeIds,
               weatherPref: submissionData.weatherPref,
               tripDays: submissionData.tripDays,
+              // NOT sending activityTypeIds - might need separate endpoint
             },
           }).unwrap();
+          console.log("Update successful:", result);
         } else {
           // Create new preferences
-          await submitPreferences(submissionData).unwrap();
+          console.log("Creating new preferences");
+          const result = await submitPreferences(submissionData).unwrap();
+          console.log("Create successful:", result);
         }
 
         // Store submission data in sessionStorage to pass to results page
@@ -262,8 +289,28 @@ const Quiz = () => {
         navigate("/quiz/results");
       } catch (error: any) {
         console.error("Error submitting quiz:", error);
+        console.error("Error details:", {
+          status: error?.status,
+          data: error?.data,
+          message: error?.message,
+          originalStatus: error?.originalStatus,
+        });
+        
+        // More detailed error message
+        let errorMessage = "Please try again.";
+        if (error?.status === 401) {
+          errorMessage = "Your session has expired. Please log in again.";
+          setTimeout(() => navigate("/login"), 2000);
+        } else if (error?.status === 400) {
+          errorMessage = error?.data?.message || "Invalid data submitted. Please check your answers.";
+        } else if (error?.status === 500) {
+          errorMessage = "Server error. Please try again in a few moments.";
+        } else if (error?.data?.message) {
+          errorMessage = error.data.message;
+        }
+        
         alert(
-          `Failed to ${existingPreferences?.profileId ? "update" : "submit"} quiz: ${error?.data?.message || "Please try again."}`
+          `Failed to ${existingPreferences?.profileId ? "update" : "submit"} quiz: ${errorMessage}`
         );
       }
     }

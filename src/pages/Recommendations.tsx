@@ -5,6 +5,7 @@ import FilterRecommendations from "./../components/Filter Recommendations/Filter
 import RecommendedCards from "./../components/Recommended Cards/RecommendedCards";
 import { fetchAttractions, type Attraction } from "../data/attractions";
 import { fetchVibeTagsForPlaces } from "../services/vibeTagsService";
+import type { MLRecommendation } from "../features/recommendations/recommendationsApiSlice";
 
 type SortOption =
   | "rating-desc"
@@ -34,6 +35,8 @@ const ITEMS_PER_PAGE = 12;
 const Recommendations = () => {
   // In the future this can be replaced with data from an API / database.
   const [allAttractions, setAllAttractions] = useState<Attraction[]>([]);
+  const [mlRecommendations, setMlRecommendations] = useState<MLRecommendation[]>([]);
+  const [matchedAttractions, setMatchedAttractions] = useState<Attraction[]>([]);
   const [vibeTagsMap, setVibeTagsMap] = useState<Map<string, string[]>>(
     new Map()
   );
@@ -41,25 +44,109 @@ const Recommendations = () => {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortOption, setSortOption] = useState<SortOption>("rating-desc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isUsingMLRecommendations, setIsUsingMLRecommendations] = useState(false);
+
+  // Load ML recommendations from sessionStorage
+  useEffect(() => {
+    const storedRecommendations = sessionStorage.getItem("mlRecommendations");
+    if (storedRecommendations) {
+      try {
+        const parsed = JSON.parse(storedRecommendations);
+        console.log("Loaded ML recommendations:", parsed.length);
+        console.log("First recommendation structure:", parsed[0]);
+        
+        // Validate the data structure
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMlRecommendations(parsed);
+          setIsUsingMLRecommendations(true);
+        } else {
+          console.error("Invalid ML recommendations data:", parsed);
+        }
+      } catch (error) {
+        console.error("Error parsing ML recommendations:", error);
+        sessionStorage.removeItem("mlRecommendations"); // Clean up invalid data
+      }
+    }
+  }, []);
 
   // Fetch attractions
   useEffect(() => {
     fetchAttractions().then(setAllAttractions);
   }, []);
 
-  // Fetch vibe tags for all attractions when they're loaded
+  // Match ML recommendations with full place data from Places API
   useEffect(() => {
-    if (allAttractions.length > 0) {
+    if (mlRecommendations.length > 0 && allAttractions.length > 0) {
+      console.log("Matching ML recommendations with Places API...");
+      console.log("Sample ML recommendation:", mlRecommendations[0]);
+      console.log("Sample attraction:", allAttractions[0]);
+      
+      // Create a map of lowercase names to attractions for faster lookup
+      // The normalized Attraction type uses 'title' instead of 'name'
+      const attractionsByName = new Map<string, Attraction>();
+      allAttractions.forEach((attr) => {
+        if (attr.title) {
+          const normalizedName = attr.title.toLowerCase().trim();
+          attractionsByName.set(normalizedName, attr);
+        }
+      });
+      
+      console.log(`Built lookup map with ${attractionsByName.size} attractions`);
+      
+      // Match recommendations by name
+      const matched: Attraction[] = [];
+      mlRecommendations.forEach((rec) => {
+        // Safety check for rec.Name
+        if (!rec || !rec.Name) {
+          console.warn("Invalid recommendation object:", rec);
+          return;
+        }
+        
+        const normalizedRecName = rec.Name.toLowerCase().trim();
+        const matchedAttr = attractionsByName.get(normalizedRecName);
+        
+        if (matchedAttr) {
+          // Add ML score to the attraction for sorting
+          matched.push({
+            ...matchedAttr,
+            mlScore: rec.Final_Score || 0,
+          });
+          console.log(`✓ Matched: ${rec.Name} -> ${matchedAttr.title}`);
+        } else {
+          console.warn(`✗ No match found for: ${rec.Name}`);
+        }
+      });
+      
+      // Sort by ML score (highest first)
+      matched.sort((a: any, b: any) => (b.mlScore || 0) - (a.mlScore || 0));
+      
+      setMatchedAttractions(matched);
+      console.log(`Matched ${matched.length} out of ${mlRecommendations.length} recommendations`);
+    }
+  }, [mlRecommendations, allAttractions]);
+
+  // Fetch vibe tags for attractions when they're loaded
+  useEffect(() => {
+    const attractionsToFetch = isUsingMLRecommendations && matchedAttractions.length > 0
+      ? matchedAttractions
+      : allAttractions;
+      
+    if (attractionsToFetch.length > 0) {
       setLoadingVibeTags(true);
-      const placeIds = allAttractions.map((attr) => attr.placeId);
+      const placeIds = attractionsToFetch.map((attr) => attr.placeId);
       fetchVibeTagsForPlaces(placeIds)
         .then(setVibeTagsMap)
         .finally(() => setLoadingVibeTags(false));
     }
-  }, [allAttractions]);
+  }, [allAttractions, matchedAttractions, isUsingMLRecommendations]);
 
   const filteredAttractions = useMemo(() => {
-    let list = [...allAttractions];
+    // Use ML-matched attractions if available, otherwise use all attractions
+    const baseList = isUsingMLRecommendations && matchedAttractions.length > 0
+      ? matchedAttractions
+      : allAttractions;
+    
+    let list = [...baseList];
 
     // Apply filters
     list = list.filter((item: any) => {
@@ -121,25 +208,31 @@ const Recommendations = () => {
     });
 
     // Apply sorting
-    list.sort((a: any, b: any) => {
-      switch (sortOption) {
-        case "rating-asc":
-          return (a.rating ?? 0) - (b.rating ?? 0);
-        case "rating-desc":
-          return (b.rating ?? 0) - (a.rating ?? 0);
-        case "budget-asc":
-          return (a.price ?? 0) - (b.price ?? 0);
-        case "budget-desc":
-          return (b.price ?? 0) - (a.price ?? 0);
-        case "distance-asc":
-          return (a.distanceKm ?? 0) - (b.distanceKm ?? 0);
-        default:
-          return 0;
-      }
-    });
+    // If using ML recommendations and no sort option selected, keep ML score order
+    if (isUsingMLRecommendations && sortOption === "rating-desc" && matchedAttractions.length > 0) {
+      // Keep the ML score order (already sorted when matched)
+      // Don't re-sort
+    } else {
+      list.sort((a: any, b: any) => {
+        switch (sortOption) {
+          case "rating-asc":
+            return (a.rating ?? 0) - (b.rating ?? 0);
+          case "rating-desc":
+            return (b.rating ?? 0) - (a.rating ?? 0);
+          case "budget-asc":
+            return (a.price ?? 0) - (b.price ?? 0);
+          case "budget-desc":
+            return (b.price ?? 0) - (a.price ?? 0);
+          case "distance-asc":
+            return (a.distanceKm ?? 0) - (b.distanceKm ?? 0);
+          default:
+            return 0;
+        }
+      });
+    }
 
     return list;
-  }, [allAttractions, filters, sortOption, vibeTagsMap]);
+  }, [allAttractions, matchedAttractions, filters, sortOption, vibeTagsMap, isUsingMLRecommendations]);
 
   // Reset to first page when filters or sort option changes
   useEffect(() => {
@@ -161,12 +254,32 @@ const Recommendations = () => {
 
       <div className="mx-4 sm:mx-6 lg:mx-20">
         <h1 className="text-3xl font-bold mt-8 mb-4">
-          Personalized Recommendations
+          {isUsingMLRecommendations ? "AI-Powered Recommendations" : "Personalized Recommendations"}
         </h1>
         <p className="text-lg mb-6 text-gray-500">
-          Discover amazing attractions in Cairo and Giza tailored to your
-          preferences.
+          {isUsingMLRecommendations 
+            ? `Discover ${matchedAttractions.length} AI-curated attractions tailored specifically for you based on your quiz results.`
+            : "Discover amazing attractions in Cairo and Giza tailored to your preferences."
+          }
         </p>
+        {isUsingMLRecommendations && (
+          <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-sm text-orange-800">
+              ✨ <strong>AI Recommendations Active:</strong> These places are ranked by our machine learning model based on your preferences.
+              <button
+                onClick={() => {
+                  sessionStorage.removeItem("mlRecommendations");
+                  setMlRecommendations([]);
+                  setMatchedAttractions([]);
+                  setIsUsingMLRecommendations(false);
+                }}
+                className="ml-2 text-orange-600 hover:text-orange-700 underline font-medium"
+              >
+                View all places instead
+              </button>
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end items-end mx-4 sm:mx-6 lg:mx-20">

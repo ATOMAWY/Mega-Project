@@ -11,6 +11,10 @@ const baseQuery = fetchBaseQuery({
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
+    // Ensure Content-Type is set for JSON requests
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
     return headers;
   },
 });
@@ -52,6 +56,6 @@ const baseQueryWithReauth: typeof baseQuery = async (
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Attractions", "Users", "Favorites", "Preferences"],
+  tagTypes: ["Attractions", "Users", "Favorites", "Preferences", "Recommendations"],
   endpoints: (_: any) => ({}),
 });

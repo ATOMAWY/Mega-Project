@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../app/api/store";
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import { FaCheckCircle, FaMapMarkerAlt } from "react-icons/fa";
 import type { QuizSubmissionData } from "./Quiz";
+import { useGenerateRecommendationsMutation } from "../features/recommendations/recommendationsApiSlice";
 
 const QuizResults = () => {
   const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.auth.user);
   const [quizData, setQuizData] = useState<QuizSubmissionData | null>(null);
+  const [recommendationCount, setRecommendationCount] = useState<number>(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  const [generateRecommendations] = useGenerateRecommendationsMutation();
 
   useEffect(() => {
     // Retrieve quiz results from sessionStorage
@@ -24,14 +32,39 @@ const QuizResults = () => {
       navigate("/quiz");
     }
   }, [navigate]);
+  
+  // Generate ML recommendations after quiz completion
+  useEffect(() => {
+    const generateMLRecommendations = async () => {
+      if (!user?.id || !quizData || isGenerating) return;
+      
+      setIsGenerating(true);
+      try {
+        console.log("Generating ML recommendations for user:", user.id);
+        const result = await generateRecommendations({ userId: user.id }).unwrap();
+        console.log("ML Recommendations generated:", result);
+        
+        // Store recommendations in sessionStorage for the Recommendations page
+        sessionStorage.setItem("mlRecommendations", JSON.stringify(result.recommendations));
+        setRecommendationCount(result.count);
+      } catch (error: any) {
+        console.error("Error generating ML recommendations:", error);
+        // Don't block the user if ML fails - they can still browse all places
+        setRecommendationCount(0);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+    
+    generateMLRecommendations();
+  }, [user?.id, quizData, generateRecommendations]);
 
   if (!quizData) {
     return null; // Will redirect in useEffect
   }
 
-  // Mock data for recommendations (replace with actual API call later)
   const recommendations = {
-    matchedAttractions: 12,
+    matchedAttractions: recommendationCount,
   };
 
   return (
@@ -89,17 +122,32 @@ const QuizResults = () => {
           {/* Call to Action Button */}
           <div className="flex flex-col items-center gap-4">
             <button
-              disabled
-              className="w-full sm:w-auto px-8 py-3 bg-gray-300 text-gray-500 font-semibold rounded-lg shadow-md cursor-not-allowed flex items-center justify-center gap-2 opacity-75"
+              onClick={() => navigate("/recommendations")}
+              disabled={isGenerating}
+              className={`w-full sm:w-auto px-8 py-3 font-semibold rounded-lg shadow-md flex items-center justify-center gap-2 transition-all ${
+                isGenerating
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-orange-400 text-white hover:bg-orange-500"
+              }`}
             >
-              View Your Personal Trip
-              <span className="text-xl">→</span>
+              {isGenerating ? (
+                <>
+                  <div className="spinner-orange-sm"></div>
+                  Generating Recommendations...
+                </>
+              ) : (
+                <>
+                  View Your Recommendations
+                  <span className="text-xl">→</span>
+                </>
+              )}
             </button>
 
             {/* Retake Quiz Link */}
             <button
               onClick={() => {
                 sessionStorage.removeItem("quizResults");
+                sessionStorage.removeItem("mlRecommendations");
                 navigate("/quiz");
               }}
               className="text-orange-400 hover:text-orange-500 font-medium transition-colors"

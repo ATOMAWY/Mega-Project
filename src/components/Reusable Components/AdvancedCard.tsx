@@ -30,6 +30,7 @@ type Props = {
   userCategory?: string;
   isEditingCategory?: boolean;
   newCategory?: string;
+  mlScore?: number; // Optional ML recommendation score
   onRemoveFavorite?: () => void;
   onEditCategory?: () => void;
   onCategoryChange?: (category: string) => void;
@@ -53,6 +54,7 @@ const AdvancedCard = ({
   userCategory,
   isEditingCategory = false,
   newCategory = "",
+  mlScore,
   onRemoveFavorite,
   onEditCategory,
   onCategoryChange,
@@ -170,7 +172,13 @@ const AdvancedCard = ({
       <div className="px-6 py-4 flex-grow">
         <div className="flex">
           {title && <div className="font-bold text-xl mb-2">{title}</div>}
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2 items-center">
+            {mlScore !== undefined && (
+              <div className="text-xs text-white bg-gradient-to-r from-orange-500 to-orange-400 px-3 py-1 rounded-full font-semibold shadow-sm flex items-center gap-1" title="AI Match Score">
+                <span className="text-yellow-200">✨</span>
+                {Math.round(mlScore * 100)}%
+              </div>
+            )}
             <p className="text-sm text-black bg-gray-200 align-middle p-2 justify-center w-fit px-2 rounded-full">
               {category}
             </p>

@@ -78,6 +78,8 @@ export type Attraction = {
     userCategory?: string;
     createdAt: string;
   };
+  /** Optional ML recommendation score (0-1) from AI model */
+  mlScore?: number;
   /** Keep the original API object around in case we need extra fields */
   raw: ApiAttraction;
 };
