@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import {
@@ -230,13 +230,13 @@ const TripPlanner = () => {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={handleGeneratePlans}
+                <Link
+                  to="/quiz"
                   className="btn btn-sm btn-outline border-orange-400 text-orange-500 hover:bg-orange-50 hover:border-orange-500 gap-2"
                 >
                   <FaSync className="text-xs" />
-                  Regenerate
-                </button>
+                  Retake Quiz
+                </Link>
               </div>
 
               {/* Plan Tabs */}

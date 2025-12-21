@@ -59,13 +59,13 @@ const Quiz = () => {
 
   // Get user info from Redux
   const user = useSelector((state: RootState) => state.auth.user);
-  
+
   // Check if user has existing preferences
   const { data: existingPreferences, isLoading: isCheckingPreferences } = useGetUserPreferencesQuery(
     user?.id || "",
     { skip: !user?.id }
   );
-  
+
   // RTK Query mutations for creating/updating preferences
   const [submitPreferences, { isLoading: isSubmitting }] = useSubmitPreferencesMutation();
   const [updatePreferences, { isLoading: isUpdating }] = useUpdatePreferencesMutation();

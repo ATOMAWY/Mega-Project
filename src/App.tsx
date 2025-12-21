@@ -27,8 +27,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/recommendations" element={<Recommendations />} />
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="/quiz/results" element={<QuizResults />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/favourites" element={<Favourites />} />
         <Route path="/attraction/:id" element={<AttractionDetails />} />
@@ -41,7 +39,8 @@ function App() {
 
         {/* protected routes */}
         <Route element={<RequireAuth />}>
-          {" "}
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/quiz/results" element={<QuizResults />} />
           <Route path="/profile" element={<UserProfile />} />
         </Route>
       </Routes>

@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../app/api/store";
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
-import { FaCheckCircle, FaMapMarkerAlt } from "react-icons/fa";
+import { FaCheckCircle, FaMapMarkerAlt, FaRobot } from "react-icons/fa";
 import type { QuizSubmissionData } from "./Quiz";
 import { useGenerateRecommendationsMutation } from "../features/recommendations/recommendationsApiSlice";
 
@@ -138,7 +138,7 @@ const QuizResults = () => {
                 </>
               ) : (
                 <>
-                  🤖 Generate AI Trip Plan
+                  <FaRobot size={21.125}/> Generate AI Trip Plan
                   <span className="text-xl">→</span>
                 </>
               )}
@@ -150,7 +150,7 @@ const QuizResults = () => {
               disabled={isGenerating}
               className="w-full sm:w-auto px-8 py-3 font-semibold rounded-lg border-2 border-orange-400 text-orange-400 hover:bg-orange-50 flex items-center justify-center gap-2 transition-all"
             >
-              Browse All Recommendations
+              Browse AI Recommendations <span className="text-xl">→</span>
             </button>
 
             {/* Retake Quiz Link */}
