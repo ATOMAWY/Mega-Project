@@ -50,6 +50,7 @@ const CardCarousel = ({ items, className }: Props) => {
                 isFavorite={attraction.isFavorite || false}
                 category={attraction.category || ""}
                 id={attraction.id !== undefined ? attraction.id : idx}
+                placeId={attraction.placeId}
               />
             </div>
           ))

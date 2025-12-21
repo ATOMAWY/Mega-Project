@@ -49,12 +49,34 @@ const AttractionDetails = () => {
 
   // Find the attraction by either numeric id or UUID placeId
   const attraction = attractions.find((attr) => {
-    const numericId = id ? parseInt(id) : null;
-    return (
-      (numericId !== null && !isNaN(numericId) && attr.id === numericId) || 
-      attr.placeId === id
-    );
+    // First try to match by placeId (UUID) - this is preferred
+    const matchByPlaceId = attr.placeId === id;
+    
+    // Only try numeric ID if the URL param is purely numeric (not a UUID)
+    // UUIDs contain hyphens, so check for that first
+    const isPurelyNumeric = id && /^\d+$/.test(id);
+    const numericId = isPurelyNumeric ? parseInt(id) : null;
+    const matchById = numericId !== null && !isNaN(numericId) && attr.id === numericId;
+    
+    if (matchById || matchByPlaceId) {
+      console.log('🎯 Found attraction match:', {
+        urlParam: id,
+        matchedBy: matchByPlaceId ? 'placeId' : 'id',
+        attraction: {
+          title: attr.title,
+          id: attr.id,
+          placeId: attr.placeId
+        }
+      });
+    }
+    
+    return matchByPlaceId || matchById;
   }) || null;
+  
+  // Log if no match found
+  if (!attraction && attractions.length > 0) {
+    console.error('❌ No attraction found for URL param:', id, 'Total attractions:', attractions.length);
+  }
 
   // Check if current place is favorited
   const isFavoriteState =

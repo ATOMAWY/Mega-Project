@@ -12,6 +12,7 @@ type Props = {
   isFavorite: boolean;
   category: string;
   id?: number;
+  placeId?: string; // UUID from backend - preferred for routing
 };
 
 export const SimpleCard = ({
@@ -21,6 +22,7 @@ export const SimpleCard = ({
   rating,
   className,
   id,
+  placeId,
 }: Props) => {
   const [hasImageError, setHasImageError] = useState(false);
   const roundedRating = Math.max(0, Math.min(5, Math.round(rating ?? 0)));
@@ -66,12 +68,21 @@ export const SimpleCard = ({
       </div>
 
       <div className="px-6 pb-4 flex-shrink-0">
-        <Link
-          to={`/attraction/${id}`}
-          className="btn bg-white align-middle justify-center w-full"
-        >
-          View Details
-        </Link>
+        {(placeId || id) ? (
+          <Link
+            to={`/attraction/${placeId || id}`}
+            className="btn bg-white align-middle justify-center w-full"
+          >
+            View Details
+          </Link>
+        ) : (
+          <button
+            className="btn bg-white align-middle justify-center w-full opacity-50 cursor-not-allowed"
+            disabled
+          >
+            View Details
+          </button>
+        )}
       </div>
     </div>
   );

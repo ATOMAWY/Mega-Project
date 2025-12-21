@@ -107,11 +107,16 @@ const Recommendations = () => {
         
         if (matchedAttr) {
           // Add ML score to the attraction for sorting
-          matched.push({
+          const enrichedAttr = {
             ...matchedAttr,
             mlScore: rec.Final_Score || 0,
+          };
+          matched.push(enrichedAttr);
+          console.log(`✓ Matched: ${rec.Name} -> ${matchedAttr.title}`, {
+            placeId: enrichedAttr.placeId,
+            id: enrichedAttr.id,
+            mlScore: enrichedAttr.mlScore
           });
-          console.log(`✓ Matched: ${rec.Name} -> ${matchedAttr.title}`);
         } else {
           console.warn(`✗ No match found for: ${rec.Name}`);
         }

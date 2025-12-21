@@ -63,6 +63,11 @@ const AdvancedCard = ({
 }: Props) => {
   const [hasImageError, setHasImageError] = useState(false);
   const user = useSelector(selectCurrentUser);
+  
+  // Debug logging
+  if (!placeId) {
+    console.warn(`⚠️ AdvancedCard missing placeId for: ${title}`, { id, placeId, title });
+  }
 
   // API mutations
   const [addFavorite, { isLoading: isAdding }] = useAddFavoriteMutation();
@@ -301,10 +306,18 @@ const AdvancedCard = ({
           </button>
         </div>
 
-        {(placeId || id !== undefined) ? (
+        {placeId ? (
           <Link
-            to={`/attraction/${placeId || id}`}
+            to={`/attraction/${placeId}`}
             className="btn bg-orange-400 align-middle justify-center text-white hover:bg-orange-500"
+            onClick={() => {
+              console.log('🔗 Navigating to attraction:', { 
+                title, 
+                placeId, 
+                id,
+                url: `/attraction/${placeId}` 
+              });
+            }}
           >
             View Details
           </Link>
