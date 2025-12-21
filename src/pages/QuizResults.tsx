@@ -119,10 +119,11 @@ const QuizResults = () => {
             </div>
           </div>
 
-          {/* Call to Action Button */}
+          {/* Call to Action Buttons */}
           <div className="flex flex-col items-center gap-4">
+            {/* Primary CTA - Generate Trip Plan */}
             <button
-              onClick={() => navigate("/recommendations")}
+              onClick={() => navigate("/trip-planner")}
               disabled={isGenerating}
               className={`w-full sm:w-auto px-8 py-3 font-semibold rounded-lg shadow-md flex items-center justify-center gap-2 transition-all ${
                 isGenerating
@@ -133,14 +134,23 @@ const QuizResults = () => {
               {isGenerating ? (
                 <>
                   <div className="spinner-orange-sm"></div>
-                  Generating Recommendations...
+                  Generating Your Plan...
                 </>
               ) : (
                 <>
-                  View Your Recommendations
+                  🤖 Generate AI Trip Plan
                   <span className="text-xl">→</span>
                 </>
               )}
+            </button>
+
+            {/* Secondary CTA - Browse Recommendations */}
+            <button
+              onClick={() => navigate("/recommendations")}
+              disabled={isGenerating}
+              className="w-full sm:w-auto px-8 py-3 font-semibold rounded-lg border-2 border-orange-400 text-orange-400 hover:bg-orange-50 flex items-center justify-center gap-2 transition-all"
+            >
+              Browse All Recommendations
             </button>
 
             {/* Retake Quiz Link */}

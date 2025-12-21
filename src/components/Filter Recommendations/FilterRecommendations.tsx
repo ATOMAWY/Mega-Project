@@ -16,7 +16,6 @@ type Props = {
 
 // Mood options matching /api/Places/vibe endpoint
 const moodOptions = [
-  "Romantic",
   "Calm",
   "Adventure",
   "Photography",
