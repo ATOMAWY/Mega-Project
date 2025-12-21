@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { CiLocationOn } from "react-icons/ci";
 import { GoLightBulb } from "react-icons/go";
 import { FaList } from "react-icons/fa6";
-import { FaCalendarAlt, FaRegHeart, FaCog } from "react-icons/fa";
+import { CgProfile } from "react-icons/cg";
+import { FaCalendarAlt, FaRegHeart} from "react-icons/fa";
 
 const options = [
   {
@@ -27,10 +28,10 @@ const options = [
     isFunctional: true,
   },
   {
-    title: "Settings",
-    desc: "Manage your account preferences and settings.",
-    icon: <FaCog />,
-    path: "/settings",
+    title: "User Profile",
+    desc: "Manage your account preferences and view your information",
+    icon: <CgProfile />,
+    path: "/profile",
     isFunctional: true,
   },
   {
