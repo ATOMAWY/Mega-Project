@@ -461,7 +461,7 @@ const UserProfile = () => {
                   <h3 className="text-sm sm:text-base font-semibold mb-4">
                     Profile Picture
                   </h3>
-                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <div className="flex flex-col sm:flex-row items-center  gap-4 ">
                     <div className="avatar">
                       <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-gray-200">
                         <img
