@@ -6,14 +6,33 @@ import { FaList } from "react-icons/fa6";
 import { FaCalendarAlt } from "react-icons/fa";
 import { FaMap } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa";
-import { logOut, selectCurrentToken } from "../../features/auth/slice";
+import { logOut, selectCurrentToken, selectCurrentUser } from "../../features/auth/slice";
 
 const NavBar = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const currentPath = location.pathname;
   const accessToken = useSelector(selectCurrentToken);
+  const user = useSelector(selectCurrentUser);
   const hasAccessToken = Boolean(accessToken || localStorage.getItem("accessToken"));
+
+  // Helper function to construct full URL from backend path
+  const constructFullUrl = (path: string | null | undefined): string => {
+    if (!path) {
+      return "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
+    }
+    // If already a full URL, return as is
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
+    // Prepend base URL to relative path
+    const baseUrl = "https://cairogo.runasp.net";
+    // Ensure path starts with /
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${baseUrl}${normalizedPath}`;
+  };
+
+  const profilePictureUrl = constructFullUrl(user?.profilePictureUrl);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -176,10 +195,15 @@ const NavBar = () => {
               role="button"
               className="btn btn-ghost btn-circle avatar"
             >
-              <div className="w-10 rounded-full">
+              <div className="w-10 rounded-full overflow-hidden border border-gray-200">
                 <img
-                  alt="Tailwind CSS Navbar component"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  alt="Profile"
+                  src={profilePictureUrl}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
+                  }}
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
