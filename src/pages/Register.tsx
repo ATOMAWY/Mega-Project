@@ -129,7 +129,7 @@ const Register = () => {
       );
 
       // Redirect to home page
-      navigate("/");
+      
     } catch (err: any) {
       console.error("Registration error:", err);
       if (err?.status === 400) {
@@ -140,6 +140,7 @@ const Register = () => {
         setError("An unexpected error occurred. Please try again.");
       }
     }
+    navigate("/");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
